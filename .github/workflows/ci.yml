@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+    branches: [ "main" ]
+  #  branches-ignore:
+  #    - main
+  pull_request:
+    branches: [ "main" ]
+  workflow_call:
+    secrets:
+      PRIVATE_KEY:
+        required: true
+      PUBLIC_KEY:
+        required: true
+  workflow_dispatch:
+
+jobs:
+  commitlint:
+    if: github.ref != 'refs/heads/main' # TODO: Remove this line when ready to enforce commitlint on main branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3.5.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '21.6.1'
+
+      - name: Install dependencies
+        run: |
+          npm init -y
+          npm install --save-dev @commitlint/cli @commitlint/config-conventional
+          echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+
+      - name: Validate all commits from PR
+        run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3.5.2
+
+      - name: Setup Go
+        uses: actions/setup-go@v4.1.0
+        id: setup-go
+        with:
+          go-version-file: ./go.mod
+          cache-dependency-path: ./go.sum
+
+      - name: Download Go modules
+        shell: bash
+        if: ${{ steps.setup-go.outputs.cache-hit != 'true' }}
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Build
+        run: go build -v -o app ./cmd/
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: app
+          path: ./app
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: app
+          path: ./
+
+      - name: Setup .env file
+        run: echo "${{ secrets.LOCAL_ENV_FILE }}" > .env
+        env:
+          LOCAL_ENV_FILE: ${{ secrets.LOCAL_ENV_FILE }}
+
+      - name: Test
+        run: go test -v ./...
+
+  lint:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: app
+          path: ./
+
+      - name: Lint
+        run: make lint
+  generate:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: app
+          path: ./
+
+      - name: Generate and check for changes
+        run: |
+          make generate
+          git add .
+          git diff --cached --quiet -- ./**/*.go

@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  mysql:
+    container_name: todo_mysql
+    image: mysql:5.7
+    platform: linux/amd64
+    ports:
+      - 3306:3306
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      #- ./repository/mysql/init/:/docker-entrypoint-initdb.d
+      #- ./repository/mysql/init/my.cnf:/etc/mysql/my.cnf
+      - db-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+  back:
+    container_name: todo_back
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./:/app/
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+
+volumes:
+  db-data:
+    driver: local
