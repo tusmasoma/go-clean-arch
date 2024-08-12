@@ -9,8 +9,8 @@ services:
       - 3306:3306
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
-      #- ./repository/mysql/init/:/docker-entrypoint-initdb.d
-      #- ./repository/mysql/init/my.cnf:/etc/mysql/my.cnf
+      - ./repository/mysql/init/:/docker-entrypoint-initdb.d
+      - ./repository/mysql/init/my.cnf:/etc/mysql/my.cnf
       - db-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}

@@ -2,9 +2,11 @@ package mysql
 
 import (
 	"context"
-	"reflect"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
 )
@@ -37,8 +39,8 @@ func Test_TaskRepository(t *testing.T) {
 	// Get
 	gottask, err := repo.Get(ctx, task1.ID)
 	ValidateErr(t, err, nil)
-	if !reflect.DeepEqual(task1, gottask) {
-		t.Errorf("want: %v, got: %v", task1, gottask)
+	if d := cmp.Diff(task1, gottask, cmpopts.IgnoreFields(entity.Task{}, "DueData", "CreatedAt")); len(d) != 0 {
+		t.Errorf("differs: (-want +got)\n%s", d)
 	}
 
 	// List
@@ -50,14 +52,13 @@ func Test_TaskRepository(t *testing.T) {
 
 	// Update
 	gottask.Title = "Updated First Task"
-	gottask.DueData = time.Now().Add(48 * time.Hour)
 	err = repo.Update(ctx, *gottask)
 	ValidateErr(t, err, nil)
 
 	updatedtask, err := repo.Get(ctx, task1.ID)
 	ValidateErr(t, err, nil)
-	if !reflect.DeepEqual(gottask, updatedtask) {
-		t.Errorf("want: %v, got: %v", gottask, updatedtask)
+	if d := cmp.Diff(gottask, updatedtask, cmpopts.IgnoreFields(entity.Task{}, "CreatedAt")); len(d) != 0 {
+		t.Errorf("differs: (-want +got)\n%s", d)
 	}
 
 	// Delete

@@ -57,7 +57,7 @@ func startMySQL() (*sql.DB, string, func(), error) {
 		Repository: "mysql",
 		Tag:        "8.0",
 		Env: []string{
-			"MYSQL_ROOT_USERNAME=root",
+			"MYSQL_ROOT_USER=root",
 			"MYSQL_ROOT_PASSWORD=goCleanArc",
 			"MYSQL_DATABASE=goCleanArcTestDB",
 		},

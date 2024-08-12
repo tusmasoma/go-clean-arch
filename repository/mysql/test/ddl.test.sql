@@ -10,5 +10,5 @@ CREATE TABLE Tasks (
     description TEXT,
     duedate TIMESTAMP,
     priority INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
