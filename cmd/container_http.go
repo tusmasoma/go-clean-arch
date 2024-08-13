@@ -18,7 +18,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func BuildContainer(ctx context.Context) (*dig.Container, error) {
+func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 	container := dig.New()
 
 	if err := container.Provide(func() context.Context {

@@ -28,7 +28,7 @@ func main() {
 	mainCtx, cancelMain := context.WithCancel(context.Background())
 	defer cancelMain()
 
-	container, err := BuildContainer(mainCtx)
+	container, err := HTTPBuildContainer(mainCtx)
 	if err != nil {
 		log.Critical("Failed to build container", log.Ferror(err))
 		return
