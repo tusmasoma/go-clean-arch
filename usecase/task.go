@@ -12,6 +12,7 @@ import (
 )
 
 type TaskUseCase interface {
+	GetTask(ctx context.Context, id string) (*entity.Task, error)
 	CreateTask(ctx context.Context, params *CreateTaskParams) error
 }
 
@@ -23,6 +24,15 @@ func NewTaskUseCase(tr repository.TaskRepository) TaskUseCase {
 	return &taskUseCase{
 		tr: tr,
 	}
+}
+
+func (tuc *taskUseCase) GetTask(ctx context.Context, id string) (*entity.Task, error) {
+	task, err := tuc.tr.Get(ctx, id)
+	if err != nil {
+		log.Error("Failed to get task", log.Ferror(err))
+		return nil, err
+	}
+	return task, nil
 }
 
 type CreateTaskParams struct {

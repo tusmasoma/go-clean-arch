@@ -4,16 +4,89 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 
+	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 	"github.com/tusmasoma/go-clean-arch/usecase/mock"
 )
+
+func TestHandler_GetTask(t *testing.T) {
+	t.Parallel()
+
+	taskID := uuid.New().String()
+	dueDate := time.Now().AddDate(0, 0, 1)
+
+	task := &entity.Task{
+		ID:          taskID,
+		Title:       "title",
+		Description: "description",
+		DueData:     dueDate,
+		Priority:    3,
+		CreatedAt:   time.Now(),
+	}
+
+	patterns := []struct {
+		name  string
+		setup func(
+			m *mock.MockTaskUseCase,
+		)
+		in         func() *http.Request
+		wantStatus int
+	}{
+		{
+			name: "success",
+			setup: func(tuc *mock.MockTaskUseCase) {
+				tuc.EXPECT().GetTask(
+					gomock.Any(),
+					taskID,
+				).Return(task, nil)
+			},
+			in: func() *http.Request {
+				req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("api/task/get?id=%s", taskID), nil)
+				return req
+			},
+			wantStatus: http.StatusOK,
+		},
+		{
+			name: "Fail: invalid request of id is empty",
+			in: func() *http.Request {
+				req, _ := http.NewRequest(http.MethodGet, "api/task/get", nil)
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			tuc := mock.NewMockTaskUseCase(ctrl)
+
+			if tt.setup != nil {
+				tt.setup(tuc)
+			}
+
+			handler := NewTaskHandler(tuc)
+			recorder := httptest.NewRecorder()
+			handler.GetTask(recorder, tt.in())
+
+			if status := recorder.Code; status != tt.wantStatus {
+				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
+			}
+		})
+	}
+}
 
 func TestHandler_CreateTask(t *testing.T) {
 	t.Parallel()

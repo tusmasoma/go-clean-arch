@@ -12,7 +12,7 @@ import (
 )
 
 type TaskHandler interface {
-	// GetTask(w http.ResponseWriter, r *http.Request)
+	GetTask(w http.ResponseWriter, r *http.Request)
 	// ListTasks(w http.ResponseWriter, r *http.Request)
 	CreateTask(w http.ResponseWriter, r *http.Request)
 	// UpdateTask(w http.ResponseWriter, r *http.Request)
@@ -26,6 +26,46 @@ type taskHandler struct {
 func NewTaskHandler(tuc usecase.TaskUseCase) TaskHandler {
 	return &taskHandler{
 		tuc: tuc,
+	}
+}
+
+type GetTaskResponse struct {
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueData     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		log.Warn("ID is required")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	task, err := th.tuc.GetTask(ctx, id)
+	if err != nil {
+		log.Error("Failed to get task", log.Ferror(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(w).Encode(GetTaskResponse{
+		ID:          task.ID,
+		Title:       task.Title,
+		Description: task.Description,
+		DueData:     task.DueData,
+		Priority:    task.Priority,
+		CreatedAt:   task.CreatedAt,
+	}); err != nil {
+		http.Error(w, "Failed to encode task to JSON", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 

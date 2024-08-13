@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 
+	entity "github.com/tusmasoma/go-clean-arch/entity"
 	usecase "github.com/tusmasoma/go-clean-arch/usecase"
 )
 
@@ -48,4 +49,19 @@ func (m *MockTaskUseCase) CreateTask(ctx context.Context, params *usecase.Create
 func (mr *MockTaskUseCaseMockRecorder) CreateTask(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTask", reflect.TypeOf((*MockTaskUseCase)(nil).CreateTask), ctx, params)
+}
+
+// GetTask mocks base method.
+func (m *MockTaskUseCase) GetTask(ctx context.Context, id string) (*entity.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTask", ctx, id)
+	ret0, _ := ret[0].(*entity.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTask indicates an expected call of GetTask.
+func (mr *MockTaskUseCaseMockRecorder) GetTask(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTask", reflect.TypeOf((*MockTaskUseCase)(nil).GetTask), ctx, id)
 }
