@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
@@ -12,11 +12,11 @@ import (
 )
 
 type TaskHandler interface {
-	GetTask(c *gin.Context)
-	ListTasks(c *gin.Context)
-	CreateTask(c *gin.Context)
-	UpdateTask(c *gin.Context)
-	DeleteTask(c *gin.Context)
+	GetTask(c echo.Context) error
+	ListTasks(c echo.Context) error
+	CreateTask(c echo.Context) error
+	UpdateTask(c echo.Context) error
+	DeleteTask(c echo.Context) error
 }
 
 type taskHandler struct {
@@ -38,20 +38,18 @@ type GetTaskResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-func (th *taskHandler) GetTask(c *gin.Context) {
-	ctx := c.Request.Context()
-	id := c.Query("id")
+func (th *taskHandler) GetTask(c echo.Context) error {
+	ctx := c.Request().Context()
+	id := c.QueryParam("id")
 	if id == "" {
 		log.Warn("ID is required")
-		c.Status(http.StatusBadRequest)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	task, err := th.tuc.GetTask(ctx, id)
 	if err != nil {
 		log.Error("Failed to get task", log.Ferror(err))
-		c.Status(http.StatusInternalServerError)
-		return
+		return c.NoContent(http.StatusInternalServerError)
 	}
 	response := GetTaskResponse{
 		ID:          task.ID,
@@ -61,7 +59,7 @@ func (th *taskHandler) GetTask(c *gin.Context) {
 		Priority:    task.Priority,
 		CreatedAt:   task.CreatedAt,
 	}
-	c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, response)
 }
 
 type ListTasksResponse struct {
@@ -75,18 +73,17 @@ type ListTasksResponse struct {
 	} `json:"tasks"`
 }
 
-func (th *taskHandler) ListTasks(c *gin.Context) {
-	ctx := c.Request.Context()
+func (th *taskHandler) ListTasks(c echo.Context) error {
+	ctx := c.Request().Context()
 
 	tasks, err := th.tuc.ListTasks(ctx)
 	if err != nil {
 		log.Error("Failed to list tasks", log.Ferror(err))
-		c.Status(http.StatusInternalServerError)
-		return
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
 	response := th.convertTasksToListTasksResponse(tasks)
-	c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, response)
 }
 
 func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) ListTasksResponse {
@@ -127,28 +124,25 @@ type CreateTaskRequest struct {
 	Priority    int       `json:"priority"`
 }
 
-func (th *taskHandler) CreateTask(c *gin.Context) {
-	ctx := c.Request.Context()
+func (th *taskHandler) CreateTask(c echo.Context) error {
+	ctx := c.Request().Context()
 
 	var requestBody CreateTaskRequest
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
+	if err := c.Bind(&requestBody); err != nil {
 		log.Error("Failed to decode request body", log.Ferror(err))
-		c.Status(http.StatusBadRequest)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 	if !th.isValidCreateTasksRequest(&requestBody) {
-		c.Status(http.StatusBadRequest)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	params := th.convertCreateTaskReqeuestToParams(requestBody)
 	if err := th.tuc.CreateTask(ctx, params); err != nil {
 		log.Error("Failed to create task", log.Ferror(err))
-		c.Status(http.StatusInternalServerError)
-		return
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	c.Status(http.StatusOK)
+	return c.NoContent(http.StatusOK)
 }
 
 func (th *taskHandler) isValidCreateTasksRequest(requestBody *CreateTaskRequest) bool {
@@ -180,28 +174,25 @@ type UpdateTaskRequest struct {
 	Priority    int       `json:"priority"`
 }
 
-func (th *taskHandler) UpdateTask(c *gin.Context) {
-	ctx := c.Request.Context()
+func (th *taskHandler) UpdateTask(c echo.Context) error {
+	ctx := c.Request().Context()
 
 	var requestBody UpdateTaskRequest
-	if err := c.ShouldBindJSON(&requestBody); err != nil {
+	if err := c.Bind(&requestBody); err != nil {
 		log.Error("Failed to decode request body", log.Ferror(err))
-		c.Status(http.StatusBadRequest)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 	if !th.isValidUpdateTasksRequest(&requestBody) {
-		c.Status(http.StatusBadRequest)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	params := th.convertUpdateTaskReqeuestToParams(requestBody)
 	if err := th.tuc.UpdateTask(ctx, params); err != nil {
 		log.Error("Failed to update task", log.Ferror(err))
-		c.Status(http.StatusInternalServerError)
-		return
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	c.Status(http.StatusOK)
+	return c.NoContent(http.StatusOK)
 }
 
 func (th *taskHandler) isValidUpdateTasksRequest(requestBody *UpdateTaskRequest) bool {
@@ -227,20 +218,18 @@ func (th *taskHandler) convertUpdateTaskReqeuestToParams(req UpdateTaskRequest) 
 	}
 }
 
-func (th *taskHandler) DeleteTask(c *gin.Context) {
-	ctx := c.Request.Context()
-	id := c.Query("id")
+func (th *taskHandler) DeleteTask(c echo.Context) error {
+	ctx := c.Request().Context()
+	id := c.QueryParam("id")
 	if id == "" {
 		log.Warn("ID is required")
-		c.Status(http.StatusBadRequest)
-		return
+		return c.NoContent(http.StatusBadRequest)
 	}
 
 	if err := th.tuc.DeleteTask(ctx, id); err != nil {
 		log.Error("Failed to delete task", log.Ferror(err))
-		c.Status(http.StatusInternalServerError)
-		return
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	c.Status(http.StatusOK)
+	return c.NoContent(http.StatusOK)
 }
