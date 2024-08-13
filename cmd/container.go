@@ -10,7 +10,7 @@ import (
 	"go.uber.org/dig"
 
 	"github.com/tusmasoma/go-clean-arch/config"
-	"github.com/tusmasoma/go-clean-arch/interfaces/handler"
+	handler "github.com/tusmasoma/go-clean-arch/interfaces/handler/http"
 	"github.com/tusmasoma/go-clean-arch/interfaces/middleware"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"

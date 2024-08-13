@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 
@@ -50,7 +51,7 @@ func TestHandler_GetTask(t *testing.T) {
 				).Return(task, nil)
 			},
 			in: func() *http.Request {
-				req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("api/task/get?id=%s", taskID), nil)
+				req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/api/task/get?id=%s", taskID), nil)
 				return req
 			},
 			wantStatus: http.StatusOK,
@@ -58,7 +59,7 @@ func TestHandler_GetTask(t *testing.T) {
 		{
 			name: "Fail: invalid request of id is empty",
 			in: func() *http.Request {
-				req, _ := http.NewRequest(http.MethodGet, "api/task/get", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/api/task/get", nil)
 				return req
 			},
 			wantStatus: http.StatusBadRequest,
@@ -79,7 +80,11 @@ func TestHandler_GetTask(t *testing.T) {
 
 			handler := NewTaskHandler(tuc)
 			recorder := httptest.NewRecorder()
-			handler.GetTask(recorder, tt.in())
+
+			router := gin.Default()
+			router.GET("/api/task/get", handler.GetTask)
+
+			router.ServeHTTP(recorder, tt.in())
 
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
@@ -128,7 +133,7 @@ func TestHandler_ListTasks(t *testing.T) {
 				).Return(tasks, nil)
 			},
 			in: func() *http.Request {
-				req, _ := http.NewRequest(http.MethodGet, "api/task/list", nil)
+				req, _ := http.NewRequest(http.MethodGet, "/api/task/list", nil)
 				return req
 			},
 			wantStatus: http.StatusOK,
@@ -149,7 +154,11 @@ func TestHandler_ListTasks(t *testing.T) {
 
 			handler := NewTaskHandler(tuc)
 			recorder := httptest.NewRecorder()
-			handler.ListTasks(recorder, tt.in())
+
+			router := gin.Default()
+			router.GET("/api/task/list", handler.ListTasks)
+
+			router.ServeHTTP(recorder, tt.in())
 
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
@@ -302,7 +311,11 @@ func TestHandler_CreateTask(t *testing.T) {
 
 			handler := NewTaskHandler(tuc)
 			recorder := httptest.NewRecorder()
-			handler.CreateTask(recorder, tt.in())
+
+			router := gin.Default()
+			router.POST("/api/task/create", handler.CreateTask)
+
+			router.ServeHTTP(recorder, tt.in())
 
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
@@ -440,7 +453,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					Priority:    0,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
-				req, _ := http.NewRequest(http.MethodPost, "/api/task/update", bytes.NewBuffer(reqBody))
+				req, _ := http.NewRequest(http.MethodPut, "/api/task/update", bytes.NewBuffer(reqBody))
 				req.Header.Set("Content-Type", "application/json")
 				return req
 			},
@@ -457,7 +470,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					Priority:    6,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
-				req, _ := http.NewRequest(http.MethodPost, "/api/task/task", bytes.NewBuffer(reqBody))
+				req, _ := http.NewRequest(http.MethodPut, "/api/task/update", bytes.NewBuffer(reqBody))
 				req.Header.Set("Content-Type", "application/json")
 				return req
 			},
@@ -479,7 +492,11 @@ func TestHandler_UpdateTask(t *testing.T) {
 
 			handler := NewTaskHandler(tuc)
 			recorder := httptest.NewRecorder()
-			handler.UpdateTask(recorder, tt.in())
+
+			router := gin.Default()
+			router.PUT("/api/task/update", handler.UpdateTask)
+
+			router.ServeHTTP(recorder, tt.in())
 
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
@@ -510,7 +527,7 @@ func TestHandler_DeleteTask(t *testing.T) {
 				).Return(nil)
 			},
 			in: func() *http.Request {
-				req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("api/task/delete?id=%s", taskID), nil)
+				req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("/api/task/delete?id=%s", taskID), nil)
 				return req
 			},
 			wantStatus: http.StatusOK,
@@ -518,7 +535,7 @@ func TestHandler_DeleteTask(t *testing.T) {
 		{
 			name: "Fail: invalid request of id is empty",
 			in: func() *http.Request {
-				req, _ := http.NewRequest(http.MethodDelete, "api/task/delete", nil)
+				req, _ := http.NewRequest(http.MethodDelete, "/api/task/delete", nil)
 				return req
 			},
 			wantStatus: http.StatusBadRequest,
@@ -539,7 +556,11 @@ func TestHandler_DeleteTask(t *testing.T) {
 
 			handler := NewTaskHandler(tuc)
 			recorder := httptest.NewRecorder()
-			handler.DeleteTask(recorder, tt.in())
+
+			router := gin.Default()
+			router.DELETE("/api/task/delete", handler.DeleteTask)
+
+			router.ServeHTTP(recorder, tt.in())
 
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
