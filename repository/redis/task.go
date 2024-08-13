@@ -112,11 +112,10 @@ func (tr *taskRepository) serialize(tasks entity.Task) (string, error) {
 }
 
 func (tr *taskRepository) deserialize(data string) (*entity.Task, error) {
-	var tasks *entity.Task
-	err := json.Unmarshal([]byte(data), tasks)
-	if err != nil {
+	var task entity.Task
+	if err := json.Unmarshal([]byte(data), &task); err != nil {
 		log.Error("Failed to deserialize tasks", log.Ferror(err))
 		return nil, err
 	}
-	return tasks, nil
+	return &task, nil
 }
