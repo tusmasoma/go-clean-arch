@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -32,13 +33,21 @@ func TestHandler_CreateTask(t *testing.T) {
 			setup: func(tuc *mock.MockTaskUseCase) {
 				tuc.EXPECT().CreateTask(
 					gomock.Any(),
-					gomock.Eq(&usecase.CreateTaskParams{
-						Title:       "title",
-						Description: "description",
-						DueData:     dueDate,
-						Priority:    3,
-					}),
-				).Return(nil)
+					gomock.Any(),
+				).Do(func(_ context.Context, params *usecase.CreateTaskParams) {
+					if params.Title != "title" {
+						t.Errorf("unexpected Title: got %v, want %v", params.Title, "title")
+					}
+					if params.Description != "description" {
+						t.Errorf("unexpected Description: got %v, want %v", params.Description, "description")
+					}
+					if !params.DueData.Equal(dueDate) {
+						t.Errorf("unexpected DueData: got %v, want %v", params.DueData, dueDate)
+					}
+					if params.Priority != 3 {
+						t.Errorf("unexpected Priority: got %v, want %v", params.Priority, 3)
+					}
+				}).Return(nil)
 			},
 			in: func() *http.Request {
 				taskCreateReq := CreateTaskRequest{
