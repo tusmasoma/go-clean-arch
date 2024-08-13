@@ -32,12 +32,12 @@ func TestHandler_CreateTask(t *testing.T) {
 			setup: func(tuc *mock.MockTaskUseCase) {
 				tuc.EXPECT().CreateTask(
 					gomock.Any(),
-					&usecase.CreateTaskParams{
+					gomock.Eq(&usecase.CreateTaskParams{
 						Title:       "title",
 						Description: "description",
 						DueData:     dueDate,
 						Priority:    3,
-					},
+					}),
 				).Return(nil)
 			},
 			in: func() *http.Request {
