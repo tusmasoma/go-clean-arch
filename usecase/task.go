@@ -13,6 +13,7 @@ import (
 
 type TaskUseCase interface {
 	GetTask(ctx context.Context, id string) (*entity.Task, error)
+	ListTasks(ctx context.Context) ([]entity.Task, error)
 	CreateTask(ctx context.Context, params *CreateTaskParams) error
 	UpdateTask(ctx context.Context, params *UpdateTaskParams) error
 	DeleteTask(ctx context.Context, id string) error
@@ -35,6 +36,15 @@ func (tuc *taskUseCase) GetTask(ctx context.Context, id string) (*entity.Task, e
 		return nil, err
 	}
 	return task, nil
+}
+
+func (tuc *taskUseCase) ListTasks(ctx context.Context) ([]entity.Task, error) {
+	tasks, err := tuc.tr.List(ctx)
+	if err != nil {
+		log.Error("Failed to list tasks", log.Ferror(err))
+		return nil, err
+	}
+	return tasks, nil
 }
 
 type CreateTaskParams struct {

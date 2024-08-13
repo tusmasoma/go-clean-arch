@@ -80,6 +80,21 @@ func (mr *MockTaskUseCaseMockRecorder) GetTask(ctx, id interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTask", reflect.TypeOf((*MockTaskUseCase)(nil).GetTask), ctx, id)
 }
 
+// ListTasks mocks base method.
+func (m *MockTaskUseCase) ListTasks(ctx context.Context) ([]entity.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListTasks", ctx)
+	ret0, _ := ret[0].([]entity.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListTasks indicates an expected call of ListTasks.
+func (mr *MockTaskUseCaseMockRecorder) ListTasks(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTasks", reflect.TypeOf((*MockTaskUseCase)(nil).ListTasks), ctx)
+}
+
 // UpdateTask mocks base method.
 func (m *MockTaskUseCase) UpdateTask(ctx context.Context, params *usecase.UpdateTaskParams) error {
 	m.ctrl.T.Helper()
