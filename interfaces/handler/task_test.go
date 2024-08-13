@@ -417,3 +417,63 @@ func TestHandler_UpdateTask(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_DeleteTask(t *testing.T) {
+	t.Parallel()
+
+	taskID := uuid.New().String()
+
+	patterns := []struct {
+		name  string
+		setup func(
+			m *mock.MockTaskUseCase,
+		)
+		in         func() *http.Request
+		wantStatus int
+	}{
+		{
+			name: "success",
+			setup: func(tuc *mock.MockTaskUseCase) {
+				tuc.EXPECT().DeleteTask(
+					gomock.Any(),
+					taskID,
+				).Return(nil)
+			},
+			in: func() *http.Request {
+				req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("api/task/delete?id=%s", taskID), nil)
+				return req
+			},
+			wantStatus: http.StatusOK,
+		},
+		{
+			name: "Fail: invalid request of id is empty",
+			in: func() *http.Request {
+				req, _ := http.NewRequest(http.MethodDelete, "api/task/delete", nil)
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			tuc := mock.NewMockTaskUseCase(ctrl)
+
+			if tt.setup != nil {
+				tt.setup(tuc)
+			}
+
+			handler := NewTaskHandler(tuc)
+			recorder := httptest.NewRecorder()
+			handler.DeleteTask(recorder, tt.in())
+
+			if status := recorder.Code; status != tt.wantStatus {
+				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
+			}
+		})
+	}
+}
