@@ -88,6 +88,76 @@ func TestHandler_GetTask(t *testing.T) {
 	}
 }
 
+func TestHandler_ListTasks(t *testing.T) {
+	t.Parallel()
+
+	dueDate := time.Now().AddDate(0, 0, 1)
+
+	tasks := []entity.Task{
+		{
+			ID:          uuid.New().String(),
+			Title:       "title1",
+			Description: "description1",
+			DueData:     dueDate,
+			Priority:    3,
+			CreatedAt:   time.Now(),
+		},
+		{
+			ID:          uuid.New().String(),
+			Title:       "title2",
+			Description: "description2",
+			DueData:     dueDate,
+			Priority:    3,
+			CreatedAt:   time.Now(),
+		},
+	}
+
+	patterns := []struct {
+		name  string
+		setup func(
+			m *mock.MockTaskUseCase,
+		)
+		in         func() *http.Request
+		wantStatus int
+	}{
+		{
+			name: "success",
+			setup: func(tuc *mock.MockTaskUseCase) {
+				tuc.EXPECT().ListTasks(
+					gomock.Any(),
+				).Return(tasks, nil)
+			},
+			in: func() *http.Request {
+				req, _ := http.NewRequest(http.MethodGet, "api/task/list", nil)
+				return req
+			},
+			wantStatus: http.StatusOK,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			tuc := mock.NewMockTaskUseCase(ctrl)
+
+			if tt.setup != nil {
+				tt.setup(tuc)
+			}
+
+			handler := NewTaskHandler(tuc)
+			recorder := httptest.NewRecorder()
+			handler.ListTasks(recorder, tt.in())
+
+			if status := recorder.Code; status != tt.wantStatus {
+				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
+			}
+		})
+	}
+}
+
 func TestHandler_CreateTask(t *testing.T) {
 	t.Parallel()
 
