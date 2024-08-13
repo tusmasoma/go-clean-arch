@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
@@ -17,15 +17,15 @@ func Test_Logging(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		handler         gin.HandlerFunc
+		handler         echo.HandlerFunc
 		expectedStatus  int
 		expectAccessLog bool
 		expectErrorLog  bool
 	}{
 		{
 			name: "successful request",
-			handler: func(c *gin.Context) {
-				c.String(http.StatusOK, "OK")
+			handler: func(c echo.Context) error {
+				return c.String(http.StatusOK, "OK")
 			},
 			expectedStatus:  http.StatusOK,
 			expectAccessLog: true,
@@ -33,8 +33,8 @@ func Test_Logging(t *testing.T) {
 		},
 		{
 			name: "client error request",
-			handler: func(c *gin.Context) {
-				c.String(http.StatusBadRequest, "Bad Request")
+			handler: func(c echo.Context) error {
+				return c.String(http.StatusBadRequest, "Bad Request")
 			},
 			expectedStatus:  http.StatusBadRequest,
 			expectAccessLog: true,
@@ -45,13 +45,14 @@ func Test_Logging(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			router := gin.New()
-			router.Use(Logging())
-			router.GET("/foo", tt.handler)
+			e := echo.New()
+			e.Use(Logging)
+			e.GET("/foo", tt.handler)
 
 			req := httptest.NewRequest(http.MethodGet, "/foo", nil)
 			w := httptest.NewRecorder()
-			router.ServeHTTP(w, req)
+
+			e.ServeHTTP(w, req)
 
 			if status := w.Result().StatusCode; status != tt.expectedStatus {
 				t.Errorf("expected status code %d, got %d", tt.expectedStatus, status)
