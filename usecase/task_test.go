@@ -88,7 +88,85 @@ func TestUseCase_GetTask(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(getTask, tt.want.task) {
-				t.Errorf("GetTask() got = %v, want %v", task, tt.want.task)
+				t.Errorf("GetTask() got = %v, want %v", getTask, tt.want.task)
+			}
+		})
+	}
+}
+
+func TestUseCase_ListTasks(t *testing.T) {
+	t.Parallel()
+
+	dueDate := time.Now().AddDate(0, 0, 1)
+
+	tasks := []entity.Task{
+		{
+			ID:          uuid.New().String(),
+			Title:       "title",
+			Description: "description",
+			DueData:     dueDate,
+			Priority:    3,
+			CreatedAt:   time.Now(),
+		},
+	}
+
+	patterns := []struct {
+		name  string
+		setup func(
+			m *mock.MockTaskRepository,
+		)
+		arg struct {
+			ctx context.Context
+		}
+		want struct {
+			tasks []entity.Task
+			err   error
+		}
+	}{
+		{
+			name: "success",
+			setup: func(tr *mock.MockTaskRepository) {
+				tr.EXPECT().List(gomock.Any()).Return(tasks, nil)
+			},
+			arg: struct {
+				ctx context.Context
+			}{
+				ctx: context.Background(),
+			},
+			want: struct {
+				tasks []entity.Task
+				err   error
+			}{
+				tasks: tasks,
+				err:   nil,
+			},
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			tr := mock.NewMockTaskRepository(ctrl)
+
+			if tt.setup != nil {
+				tt.setup(tr)
+			}
+
+			tuc := NewTaskUseCase(tr)
+
+			getTasks, err := tuc.ListTasks(tt.arg.ctx)
+
+			if (err != nil) != (tt.want.err != nil) {
+				t.Errorf("ListTasks() error = %v, wantErr %v", err, tt.want.err)
+			} else if err != nil && tt.want.err != nil && err.Error() != tt.want.err.Error() {
+				t.Errorf("ListTasks() error = %v, wantErr %v", err, tt.want.err)
+			}
+
+			if !reflect.DeepEqual(getTasks, tt.want.tasks) {
+				t.Errorf("ListTasks() got = %v, want %v", getTasks, tt.want.tasks)
 			}
 		})
 	}
