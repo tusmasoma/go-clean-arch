@@ -11,6 +11,7 @@ import (
 
 	"github.com/tusmasoma/go-clean-arch/config"
 	"github.com/tusmasoma/go-clean-arch/interfaces/handler"
+	"github.com/tusmasoma/go-clean-arch/interfaces/middleware"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
@@ -49,6 +50,7 @@ func BuildContainer(ctx context.Context) (*dig.Container, error) {
 				MaxAge:             serverConfig.PreflightCacheDurationSec,
 				OptionsPassthrough: true,
 			}))
+			r.Use(middleware.Logging)
 
 			r.Route("/api", func(r chi.Router) {
 				r.Route("/task", func(r chi.Router) {
