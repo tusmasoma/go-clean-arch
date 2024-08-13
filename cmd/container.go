@@ -6,17 +6,18 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
+	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+	"go.uber.org/dig"
+
 	"github.com/tusmasoma/go-clean-arch/config"
 	"github.com/tusmasoma/go-clean-arch/interfaces/handler"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
-	"go.uber.org/dig"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func BuildContainer(ctx context.Context) (*dig.Container, error) { //nolint:funlen
+func BuildContainer(ctx context.Context) (*dig.Container, error) {
 	container := dig.New()
 
 	if err := container.Provide(func() context.Context {
