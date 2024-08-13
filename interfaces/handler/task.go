@@ -23,8 +23,10 @@ type taskHandler struct {
 	tuc usecase.TaskUseCase
 }
 
-func NewTaskHandler() TaskHandler {
-	return &taskHandler{}
+func NewTaskHandler(tuc usecase.TaskUseCase) TaskHandler {
+	return &taskHandler{
+		tuc: tuc,
+	}
 }
 
 type CreateTaskRequest struct {
@@ -51,7 +53,7 @@ func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (th *taskHandler) isValidCreateTasksRequest(body io.ReadCloser, requestBody *CreateTaskRequest) bool {
