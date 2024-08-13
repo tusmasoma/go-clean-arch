@@ -240,3 +240,180 @@ func TestHandler_CreateTask(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_UpdateTask(t *testing.T) {
+	t.Parallel()
+
+	taskID := uuid.New().String()
+	dueDate := time.Now().AddDate(0, 0, 1)
+
+	patterns := []struct {
+		name  string
+		setup func(
+			m *mock.MockTaskUseCase,
+		)
+		in         func() *http.Request
+		wantStatus int
+	}{
+		{
+			name: "success",
+			setup: func(tuc *mock.MockTaskUseCase) {
+				tuc.EXPECT().UpdateTask(
+					gomock.Any(),
+					gomock.Any(),
+				).Do(func(_ context.Context, params *usecase.UpdateTaskParams) {
+					if params.Title != "updated title" {
+						t.Errorf("unexpected Title: got %v, want %v", params.Title, "title")
+					}
+					if params.Description != "updated description" {
+						t.Errorf("unexpected Description: got %v, want %v", params.Description, "description")
+					}
+					if !params.DueData.Equal(dueDate) {
+						t.Errorf("unexpected DueData: got %v, want %v", params.DueData, dueDate)
+					}
+					if params.Priority != 2 {
+						t.Errorf("unexpected Priority: got %v, want %v", params.Priority, 3)
+					}
+				}).Return(nil)
+			},
+			in: func() *http.Request {
+				taskUpdateReq := UpdateTaskRequest{
+					ID:          taskID,
+					Title:       "updated title",
+					Description: "updated description",
+					DueData:     dueDate,
+					Priority:    2,
+				}
+				reqBody, _ := json.Marshal(taskUpdateReq)
+				req, _ := http.NewRequest(http.MethodPut, "/api/task/update", bytes.NewBuffer(reqBody))
+				req.Header.Set("Content-Type", "application/json")
+				return req
+			},
+			wantStatus: http.StatusOK,
+		},
+		{
+			name: "Fail: invalid request of id is empty",
+			in: func() *http.Request {
+				taskUpdateReq := UpdateTaskRequest{
+					ID:          "",
+					Title:       "updated title",
+					Description: "updated description",
+					DueData:     dueDate,
+					Priority:    2,
+				}
+				reqBody, _ := json.Marshal(taskUpdateReq)
+				req, _ := http.NewRequest(http.MethodPut, "/api/task/update", bytes.NewBuffer(reqBody))
+				req.Header.Set("Content-Type", "application/json")
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name: "Fail: invalid request of title is empty",
+			in: func() *http.Request {
+				taskUpdateReq := UpdateTaskRequest{
+					ID:          taskID,
+					Title:       "",
+					Description: "updated description",
+					DueData:     dueDate,
+					Priority:    2,
+				}
+				reqBody, _ := json.Marshal(taskUpdateReq)
+				req, _ := http.NewRequest(http.MethodPut, "/api/task/update", bytes.NewBuffer(reqBody))
+				req.Header.Set("Content-Type", "application/json")
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name: "Fail: invalid request of description is empty",
+			in: func() *http.Request {
+				taskUpdateReq := UpdateTaskRequest{
+					ID:          taskID,
+					Title:       "updated title",
+					Description: "",
+					DueData:     dueDate,
+					Priority:    2,
+				}
+				reqBody, _ := json.Marshal(taskUpdateReq)
+				req, _ := http.NewRequest(http.MethodPut, "/api/task/update", bytes.NewBuffer(reqBody))
+				req.Header.Set("Content-Type", "application/json")
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name: "Fail: invalid request of due_date is zero",
+			in: func() *http.Request {
+				taskUpdateReq := UpdateTaskRequest{
+					ID:          taskID,
+					Title:       "updated title",
+					Description: "updated description",
+					DueData:     time.Time{},
+					Priority:    2,
+				}
+				reqBody, _ := json.Marshal(taskUpdateReq)
+				req, _ := http.NewRequest(http.MethodPut, "/api/task/update", bytes.NewBuffer(reqBody))
+				req.Header.Set("Content-Type", "application/json")
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name: "Fail: invalid request of priority is less than 1",
+			in: func() *http.Request {
+				taskUpdateReq := UpdateTaskRequest{
+					ID:          taskID,
+					Title:       "updated title",
+					Description: "updated description",
+					DueData:     dueDate,
+					Priority:    0,
+				}
+				reqBody, _ := json.Marshal(taskUpdateReq)
+				req, _ := http.NewRequest(http.MethodPost, "/api/task/update", bytes.NewBuffer(reqBody))
+				req.Header.Set("Content-Type", "application/json")
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name: "Fail: invalid request of priority is greater than 5",
+			in: func() *http.Request {
+				taskUpdateReq := UpdateTaskRequest{
+					ID:          taskID,
+					Title:       "updated title",
+					Description: "updated description",
+					DueData:     dueDate,
+					Priority:    6,
+				}
+				reqBody, _ := json.Marshal(taskUpdateReq)
+				req, _ := http.NewRequest(http.MethodPost, "/api/task/task", bytes.NewBuffer(reqBody))
+				req.Header.Set("Content-Type", "application/json")
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			tuc := mock.NewMockTaskUseCase(ctrl)
+
+			if tt.setup != nil {
+				tt.setup(tuc)
+			}
+
+			handler := NewTaskHandler(tuc)
+			recorder := httptest.NewRecorder()
+			handler.UpdateTask(recorder, tt.in())
+
+			if status := recorder.Code; status != tt.wantStatus {
+				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
+			}
+		})
+	}
+}
