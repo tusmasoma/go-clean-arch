@@ -11,7 +11,7 @@ import (
 
 	"github.com/tusmasoma/go-clean-arch/config"
 	handler "github.com/tusmasoma/go-clean-arch/interfaces/handler/http"
-	"github.com/tusmasoma/go-clean-arch/interfaces/middleware"
+	middleware "github.com/tusmasoma/go-clean-arch/interfaces/middleware/http"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
