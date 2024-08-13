@@ -9,6 +9,8 @@ import (
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	_ "github.com/lib/pq" // This blank import is used for its init function
 )
 
 var (

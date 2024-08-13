@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
 	"github.com/tusmasoma/go-clean-arch/config"
 	"github.com/tusmasoma/go-clean-arch/repository"
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
 type SQLExecutor interface {
