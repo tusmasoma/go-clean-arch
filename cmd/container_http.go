@@ -10,15 +10,15 @@ import (
 	"go.uber.org/dig"
 
 	"github.com/tusmasoma/go-clean-arch/config"
-	"github.com/tusmasoma/go-clean-arch/interfaces/handler"
-	"github.com/tusmasoma/go-clean-arch/interfaces/middleware"
+	handler "github.com/tusmasoma/go-clean-arch/interfaces/handler/http"
+	middleware "github.com/tusmasoma/go-clean-arch/interfaces/middleware/http"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func BuildContainer(ctx context.Context) (*dig.Container, error) {
+func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 	container := dig.New()
 
 	if err := container.Provide(func() context.Context {
