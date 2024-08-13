@@ -21,6 +21,12 @@ type DBConfig struct {
 	DBName   string `env:"DB_NAME, required"`
 }
 
+type CacheConfig struct {
+	Addr     string `env:"ADDR, required"`
+	Password string `env:"PASSWORD, required"`
+	DB       int    `env:"DB, required"`
+}
+
 type ServerConfig struct {
 	ReadTimeout               time.Duration `env:"READ_TIMEOUT,default=5s"`
 	WriteTimeout              time.Duration `env:"WRITE_TIMEOUT,default=10s"`
@@ -34,6 +40,16 @@ func NewDBConfig(ctx context.Context, dbPrefix string) (*DBConfig, error) {
 	pl := envconfig.PrefixLookuper(dbPrefix, envconfig.OsLookuper())
 	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
 		log.Error("Failed to load database config", log.Ferror(err))
+		return nil, err
+	}
+	return conf, nil
+}
+
+func NewCacheConfig(ctx context.Context, cachePrefix string) (*CacheConfig, error) {
+	conf := &CacheConfig{}
+	pl := envconfig.PrefixLookuper(cachePrefix, envconfig.OsLookuper())
+	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+		log.Error("Failed to load cache config", log.Ferror(err))
 		return nil, err
 	}
 	return conf, nil
