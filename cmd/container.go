@@ -55,6 +55,7 @@ func BuildContainer(ctx context.Context) (*dig.Container, error) {
 					r.Get("/get", taskHandler.GetTask)
 					r.Post("/create", taskHandler.CreateTask)
 					r.Put("/update", taskHandler.UpdateTask)
+					r.Delete("/delete", taskHandler.DeleteTask)
 				})
 			})
 

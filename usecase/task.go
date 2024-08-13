@@ -15,6 +15,7 @@ type TaskUseCase interface {
 	GetTask(ctx context.Context, id string) (*entity.Task, error)
 	CreateTask(ctx context.Context, params *CreateTaskParams) error
 	UpdateTask(ctx context.Context, params *UpdateTaskParams) error
+	DeleteTask(ctx context.Context, id string) error
 }
 
 type taskUseCase struct {
@@ -78,6 +79,14 @@ func (tuc *taskUseCase) UpdateTask(ctx context.Context, params *UpdateTaskParams
 
 	if err = tuc.tr.Update(ctx, *task); err != nil {
 		log.Error("Failed to update task", log.Ferror(err))
+		return err
+	}
+	return nil
+}
+
+func (tuc *taskUseCase) DeleteTask(ctx context.Context, id string) error {
+	if err := tuc.tr.Delete(ctx, id); err != nil {
+		log.Error("Failed to delete task", log.Ferror(err))
 		return err
 	}
 	return nil

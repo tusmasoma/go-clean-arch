@@ -16,7 +16,7 @@ type TaskHandler interface {
 	// ListTasks(w http.ResponseWriter, r *http.Request)
 	CreateTask(w http.ResponseWriter, r *http.Request)
 	UpdateTask(w http.ResponseWriter, r *http.Request)
-	// DeleteTask(w http.ResponseWriter, r *http.Request)
+	DeleteTask(w http.ResponseWriter, r *http.Request)
 }
 
 type taskHandler struct {
@@ -174,4 +174,22 @@ func (th *taskHandler) convertUpdateTaskReqeuestToParams(req UpdateTaskRequest) 
 		DueData:     req.DueData,
 		Priority:    req.Priority,
 	}
+}
+
+func (th *taskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		log.Warn("ID is required")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if err := th.tuc.DeleteTask(ctx, id); err != nil {
+		log.Error("Failed to delete task", log.Ferror(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
