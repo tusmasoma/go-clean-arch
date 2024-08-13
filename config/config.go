@@ -10,8 +10,6 @@ import (
 )
 
 const (
-	dbPrefix     = "MYSQL_"
-	cachePrefix  = "REDIS_"
 	serverPrefix = "SERVER_"
 )
 
@@ -31,7 +29,7 @@ type ServerConfig struct {
 	PreflightCacheDurationSec int           `env:"PREFLIGHT_CACHE_DURATION_SEC,default=300"`
 }
 
-func NewDBConfig(ctx context.Context) (*DBConfig, error) {
+func NewDBConfig(ctx context.Context, dbPrefix string) (*DBConfig, error) {
 	conf := &DBConfig{}
 	pl := envconfig.PrefixLookuper(dbPrefix, envconfig.OsLookuper())
 	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {

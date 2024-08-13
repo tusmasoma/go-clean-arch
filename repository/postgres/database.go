@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"context"
@@ -75,10 +75,10 @@ func TxFromCtx(ctx context.Context) *sql.Tx {
 }
 
 const (
-	dbPrefix = "MYSQL_"
+	dbPrefix = "POSTGRES_"
 )
 
-func NewMySQLDB(ctx context.Context) (*sql.DB, error) {
+func NewPostgresDB(ctx context.Context) (*sql.DB, error) {
 	conf, err := config.NewDBConfig(ctx, dbPrefix)
 	if err != nil {
 		log.Error("Failed to load database config", log.Ferror(err))
@@ -88,7 +88,7 @@ func NewMySQLDB(ctx context.Context) (*sql.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true",
 		conf.User, conf.Password, conf.Host, conf.Port, conf.DBName)
 
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Critical("Failed to connect to database", log.Fstring("dsn", dsn), log.Ferror(err))
 		return nil, err
