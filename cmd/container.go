@@ -54,6 +54,7 @@ func BuildContainer(ctx context.Context) (*dig.Container, error) {
 				r.Route("/task", func(r chi.Router) {
 					r.Get("/get", taskHandler.GetTask)
 					r.Post("/create", taskHandler.CreateTask)
+					r.Put("/update", taskHandler.UpdateTask)
 				})
 			})
 
