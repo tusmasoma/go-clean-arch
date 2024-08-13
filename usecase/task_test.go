@@ -8,11 +8,14 @@ import (
 
 	"github.com/golang/mock/gomock"
 
+	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/repository/mock"
 )
 
 func TestUseCase_CreateTask(t *testing.T) {
 	t.Parallel()
+
+	dueDate := time.Now().AddDate(0, 0, 1)
 
 	patterns := []struct {
 		name  string
@@ -31,7 +34,20 @@ func TestUseCase_CreateTask(t *testing.T) {
 				tr.EXPECT().Create(
 					gomock.Any(),
 					gomock.Any(),
-				).Return(nil)
+				).Do(func(_ context.Context, task entity.Task) {
+					if task.Title != "title" {
+						t.Errorf("unexpected Title: got %v, want %v", task.Title, "title")
+					}
+					if task.Description != "description" {
+						t.Errorf("unexpected Description: got %v, want %v", task.Description, "description")
+					}
+					if !task.DueData.Equal(dueDate) {
+						t.Errorf("unexpected DueData: got %v, want %v", task.DueData, dueDate)
+					}
+					if task.Priority != 3 {
+						t.Errorf("unexpected Priority: got %v, want %v", task.Priority, 3)
+					}
+				}).Return(nil)
 			},
 			arg: struct {
 				ctx    context.Context
@@ -41,7 +57,7 @@ func TestUseCase_CreateTask(t *testing.T) {
 				params: &CreateTaskParams{
 					Title:       "title",
 					Description: "description",
-					DueData:     time.Now().AddDate(0, 0, 1),
+					DueData:     dueDate,
 					Priority:    3,
 				},
 			},
