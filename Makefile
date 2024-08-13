@@ -37,7 +37,7 @@ $(BIN)/gofumpt-$(GOFUMPT_VERSION):
 	mv $(BIN)/gofumpt $(BIN)/gofumpt-$(GOFUMPT_VERSION)
 	ln -s $(BIN)/gofumpt-$(GOFUMPT_VERSION) $(BIN)/gofumpt
 
-# テストターゲット: テストを実行
+# go: test for all under the PKG
 .PHONY: test
 test:
 	$(GO) test -v -count=1 ./...

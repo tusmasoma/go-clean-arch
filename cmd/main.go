@@ -17,7 +17,6 @@ import (
 )
 
 func main() {
-	// .envファイルから環境変数を読み込む
 	if err := godotenv.Load(); err != nil {
 		log.Info("No .env file found", log.Ferror(err))
 	}
@@ -35,7 +34,6 @@ func main() {
 		return
 	}
 
-	/* ===== サーバの設定 ===== */
 	err = container.Invoke(func(router *chi.Mux, config *config.ServerConfig) {
 		srv := &http.Server{
 			Addr:         addr,
@@ -44,7 +42,6 @@ func main() {
 			WriteTimeout: config.WriteTimeout,
 			IdleTimeout:  config.IdleTimeout,
 		}
-		/* ===== サーバの起動 ===== */
 		log.Info("Server running...")
 
 		signalCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt, os.Kill)
