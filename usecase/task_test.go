@@ -169,3 +169,94 @@ func TestUseCase_CreateTask(t *testing.T) {
 		})
 	}
 }
+
+func TestUseCase_UpdateTask(t *testing.T) {
+	t.Parallel()
+
+	taskID := uuid.New().String()
+	dueDate := time.Now().AddDate(0, 0, 1)
+
+	task := &entity.Task{
+		ID:          taskID,
+		Title:       "title",
+		Description: "description",
+		DueData:     dueDate,
+		Priority:    3,
+		CreatedAt:   time.Now(),
+	}
+
+	patterns := []struct {
+		name  string
+		setup func(
+			m *mock.MockTaskRepository,
+		)
+		arg struct {
+			ctx    context.Context
+			params *UpdateTaskParams
+		}
+		wantErr error
+	}{
+		{
+			name: "success",
+			setup: func(tr *mock.MockTaskRepository) {
+				tr.EXPECT().Get(
+					gomock.Any(),
+					taskID,
+				).Return(task, nil)
+				tr.EXPECT().Update(
+					gomock.Any(),
+					gomock.Any(),
+				).Do(func(_ context.Context, task entity.Task) {
+					if task.Title != "updated title" {
+						t.Errorf("unexpected Title: got %v, want %v", task.Title, "updated title")
+					}
+					if task.Description != "updated description" {
+						t.Errorf("unexpected Description: got %v, want %v", task.Description, "updated description")
+					}
+					if !task.DueData.Equal(dueDate) {
+						t.Errorf("unexpected DueData: got %v, want %v", task.DueData, dueDate)
+					}
+					if task.Priority != 2 {
+						t.Errorf("unexpected Priority: got %v, want %v", task.Priority, 2)
+					}
+				}).Return(nil)
+			},
+			arg: struct {
+				ctx    context.Context
+				params *UpdateTaskParams
+			}{
+				ctx: context.Background(),
+				params: &UpdateTaskParams{
+					ID:          taskID,
+					Title:       "updated title",
+					Description: "updated description",
+					DueData:     dueDate,
+					Priority:    2,
+				},
+			},
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			tr := mock.NewMockTaskRepository(ctrl)
+
+			if tt.setup != nil {
+				tt.setup(tr)
+			}
+
+			tuc := NewTaskUseCase(tr)
+
+			err := tuc.UpdateTask(tt.arg.ctx, tt.arg.params)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("want: %v, got: %v", tt.wantErr, err)
+			}
+		})
+	}
+}

@@ -15,7 +15,7 @@ type TaskHandler interface {
 	GetTask(w http.ResponseWriter, r *http.Request)
 	// ListTasks(w http.ResponseWriter, r *http.Request)
 	CreateTask(w http.ResponseWriter, r *http.Request)
-	// UpdateTask(w http.ResponseWriter, r *http.Request)
+	UpdateTask(w http.ResponseWriter, r *http.Request)
 	// DeleteTask(w http.ResponseWriter, r *http.Request)
 }
 
@@ -114,6 +114,61 @@ func (th *taskHandler) isValidCreateTasksRequest(body io.ReadCloser, requestBody
 
 func (th *taskHandler) convertCreateTaskReqeuestToParams(req CreateTaskRequest) *usecase.CreateTaskParams {
 	return &usecase.CreateTaskParams{
+		Title:       req.Title,
+		Description: req.Description,
+		DueData:     req.DueData,
+		Priority:    req.Priority,
+	}
+}
+
+type UpdateTaskRequest struct {
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueData     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+}
+
+func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var requestBody UpdateTaskRequest
+	defer r.Body.Close()
+	if !th.isValidUpdateTasksRequest(r.Body, &requestBody) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	params := th.convertUpdateTaskReqeuestToParams(requestBody)
+	if err := th.tuc.UpdateTask(ctx, params); err != nil {
+		log.Error("Failed to update task", log.Ferror(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (th *taskHandler) isValidUpdateTasksRequest(body io.ReadCloser, requestBody *UpdateTaskRequest) bool {
+	if err := json.NewDecoder(body).Decode(requestBody); err != nil {
+		log.Error("Failed to decode request body", log.Ferror(err))
+		return false
+	}
+	if requestBody.ID == "" ||
+		requestBody.Title == "" ||
+		requestBody.Description == "" ||
+		requestBody.DueData.IsZero() ||
+		requestBody.Priority < 1 ||
+		requestBody.Priority > 5 {
+		log.Warn("Invalid request body: %v", requestBody)
+		return false
+	}
+	return true
+}
+
+func (th *taskHandler) convertUpdateTaskReqeuestToParams(req UpdateTaskRequest) *usecase.UpdateTaskParams {
+	return &usecase.UpdateTaskParams{
+		ID:          req.ID,
 		Title:       req.Title,
 		Description: req.Description,
 		DueData:     req.DueData,
