@@ -260,3 +260,58 @@ func TestUseCase_UpdateTask(t *testing.T) {
 		})
 	}
 }
+
+func TestUsaCase_DeleteTask(t *testing.T) {
+	t.Parallel()
+
+	taskID := uuid.New().String()
+
+	patterns := []struct {
+		name  string
+		setup func(
+			m *mock.MockTaskRepository,
+		)
+		arg struct {
+			ctx context.Context
+			id  string
+		}
+		wantErr error
+	}{
+		{
+			name: "success",
+			setup: func(tr *mock.MockTaskRepository) {
+				tr.EXPECT().Delete(gomock.Any(), taskID).Return(nil)
+			},
+			arg: struct {
+				ctx context.Context
+				id  string
+			}{
+				ctx: context.Background(),
+				id:  taskID,
+			},
+			wantErr: nil,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			ctrl := gomock.NewController(t)
+			tr := mock.NewMockTaskRepository(ctrl)
+
+			if tt.setup != nil {
+				tt.setup(tr)
+			}
+
+			tuc := NewTaskUseCase(tr)
+
+			err := tuc.DeleteTask(tt.arg.ctx, tt.arg.id)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("want: %v, got: %v", tt.wantErr, err)
+			}
+		})
+	}
+}
