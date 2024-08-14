@@ -1,5 +1,5 @@
 # Clean Architecture
-## Explanation
+## Description
 Clean Architecture is an architectural concept proposed by Robert C. Martin (commonly known as Uncle Bob) in 2012, with the goal of ensuring independence from databases and frameworks. The diagram below represents its iconic image.
 
 ![clean_arc](https://github.com/user-attachments/assets/15d93d0c-3a53-46cd-83ba-f394e35cd1ed)
@@ -8,7 +8,7 @@ Clean Architecture should be understood not as a "specific architectural pattern
 
 Before the introduction of Clean Architecture, approaches like Layered Architecture, Hexagonal Architecture, and Onion Architecture were widely known, all aiming to achieve "separation of concerns." Clean Architecture can be seen as a standardization that integrates these approaches.
 
-As shown in the diagram above, Clean Architecture does not mandate a strict division into four layers: "Enterprise Business Rules, Application Business Rules, Interface Adapters, and Frameworks & Drivers." This is merely an example. Robert C. Martin himself mentioned that "this diagram is just an overview, and Clean Architecture can have more than four layers."
+As shown in the diagram above, Clean Architecture does not mandate a strict division into four layers: **Enterprise Business Rules**, **Application Business Rules**, **Interface Adapters**, and **Frameworks & Drivers**. This is merely an example. Robert C. Martin himself mentioned that "this diagram is just an overview, and Clean Architecture can have more than four layers."
 
 The crucial point is "separation of concerns." To achieve "separation of concerns," important concepts such as "dependency rules" between layers and "dependency injection" play a vital role.
 
@@ -83,7 +83,8 @@ The dependencies between the layers are as follows:
         For instance, the Usecase Layer depends on the interfaces in the Repository Layer but does not depend on the specific implementation.
 
 ### Dependency Injection
-TODO: Under construction
+In progress of writing
 
 
 ## HOW To Run
+In progress of writing
