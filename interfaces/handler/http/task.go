@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"time"
 
@@ -143,7 +142,12 @@ func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	var requestBody CreateTaskRequest
 	defer r.Body.Close()
-	if !th.isValidCreateTasksRequest(r.Body, &requestBody) {
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		log.Error("Failed to decode request body", log.Ferror(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !th.isValidCreateTasksRequest(&requestBody) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -158,11 +162,7 @@ func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (th *taskHandler) isValidCreateTasksRequest(body io.ReadCloser, requestBody *CreateTaskRequest) bool {
-	if err := json.NewDecoder(body).Decode(requestBody); err != nil {
-		log.Error("Failed to decode request body", log.Ferror(err))
-		return false
-	}
+func (th *taskHandler) isValidCreateTasksRequest(requestBody *CreateTaskRequest) bool {
 	if requestBody.Title == "" ||
 		requestBody.Description == "" ||
 		requestBody.DueData.IsZero() ||
@@ -196,7 +196,12 @@ func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	var requestBody UpdateTaskRequest
 	defer r.Body.Close()
-	if !th.isValidUpdateTasksRequest(r.Body, &requestBody) {
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		log.Error("Failed to decode request body", log.Ferror(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !th.isValidUpdateTasksRequest(&requestBody) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -211,11 +216,7 @@ func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (th *taskHandler) isValidUpdateTasksRequest(body io.ReadCloser, requestBody *UpdateTaskRequest) bool {
-	if err := json.NewDecoder(body).Decode(requestBody); err != nil {
-		log.Error("Failed to decode request body", log.Ferror(err))
-		return false
-	}
+func (th *taskHandler) isValidUpdateTasksRequest(requestBody *UpdateTaskRequest) bool {
 	if requestBody.ID == "" ||
 		requestBody.Title == "" ||
 		requestBody.Description == "" ||
