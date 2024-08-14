@@ -22,9 +22,10 @@ type TaskHandler interface {
 
 type taskHandler struct {
 	tuc usecase.TaskUseCase
+	pb.UnimplementedTaskServiceServer
 }
 
-func NewTaskHandler(tuc usecase.TaskUseCase) TaskHandler {
+func NewTaskHandler(tuc usecase.TaskUseCase) *taskHandler { //nolint:revive // This function is used in the test
 	return &taskHandler{
 		tuc: tuc,
 	}

@@ -763,6 +763,7 @@ var (
 		(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
 	}
 )
+
 var file_task_proto_depIdxs = []int32{
 	11, // 0: task.GetTaskResponse.due_date:type_name -> google.protobuf.Timestamp
 	11, // 1: task.GetTaskResponse.created_at:type_name -> google.protobuf.Timestamp
