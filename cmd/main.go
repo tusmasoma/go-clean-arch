@@ -28,6 +28,8 @@ func main() {
 	mainCtx, cancelMain := context.WithCancel(context.Background())
 	defer cancelMain()
 
+	// This is framework-agnostic and can be replaced with any HTTP framework like net/http, Gin, or Echo
+	// The following example uses net/http.
 	container, err := HTTPBuildContainer(mainCtx)
 	if err != nil {
 		log.Critical("Failed to build container", log.Ferror(err))

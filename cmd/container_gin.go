@@ -22,7 +22,6 @@ import (
 func GinBuildContainer(ctx context.Context) (*dig.Container, error) {
 	container := dig.New()
 
-	// コンテキストをプロバイド
 	if err := container.Provide(func() context.Context {
 		return ctx
 	}); err != nil {
@@ -30,10 +29,10 @@ func GinBuildContainer(ctx context.Context) (*dig.Container, error) {
 		return nil, err
 	}
 
-	// 他のプロバイダーを登録
 	providers := []interface{}{
 		config.NewServerConfig,
 		config.NewDBConfig,
+		// This is database-agnostic and can be swapped with another database like PostgreSQL
 		mysql.NewMySQLDB,
 		mysql.NewTransactionRepository,
 		mysql.NewTaskRepository,

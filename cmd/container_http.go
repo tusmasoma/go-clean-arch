@@ -31,6 +31,7 @@ func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 	providers := []interface{}{
 		config.NewServerConfig,
 		config.NewDBConfig,
+		// This is database-agnostic and can be swapped with another database like PostgreSQL
 		mysql.NewMySQLDB,
 		mysql.NewTransactionRepository,
 		mysql.NewTaskRepository,
