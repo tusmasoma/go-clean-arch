@@ -93,7 +93,9 @@ The Interfaces Layer corresponds to both **Interface Adapters** and **Frameworks
 
 The dependencies between the layers are as follows:
 
-![clean_arc drawio (2)](https://github.com/user-attachments/assets/d8c70210-868e-4f22-91ff-4eb8793171a5)
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/d8c70210-868e-4f22-91ff-4eb8793171a5" alt="clean_arc drawio (2)">
+</div>
 
 - **Solid Arrows**: Indicate direct dependencies. These are used when one layer directly depends on another layer or component.
 - **Dashed Arrows**: Indicate indirect dependencies or abstracted dependencies. For instance, the Usecase Layer depends on the interfaces in the Repository Layer but does not depend on the specific implementation.
