@@ -39,7 +39,7 @@ func Test_TaskRepository(t *testing.T) {
 	// Get
 	gottask, err := repo.Get(ctx, task1.ID)
 	ValidateErr(t, err, nil)
-	if d := cmp.Diff(task1, gottask, cmpopts.IgnoreFields(entity.Task{}, "DueData", "CreatedAt")); len(d) != 0 {
+	if d := cmp.Diff(task1, gottask, cmpopts.IgnoreFields(entity.Task{}, "DueDate", "CreatedAt")); len(d) != 0 {
 		t.Errorf("differs: (-want +got)\n%s", d)
 	}
 

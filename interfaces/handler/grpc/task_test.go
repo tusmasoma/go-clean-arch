@@ -73,7 +73,7 @@ func TestHandler_GetTask(t *testing.T) {
 		ID:          taskID,
 		Title:       "title",
 		Description: "description",
-		DueData:     dueDate,
+		DueDate:     dueDate,
 		Priority:    3,
 		CreatedAt:   time.Now(),
 	}
@@ -136,7 +136,7 @@ func TestHandler_ListTasks(t *testing.T) {
 			ID:          uuid.New().String(),
 			Title:       "title1",
 			Description: "description1",
-			DueData:     dueDate,
+			DueDate:     dueDate,
 			Priority:    3,
 			CreatedAt:   time.Now(),
 		},
@@ -144,7 +144,7 @@ func TestHandler_ListTasks(t *testing.T) {
 			ID:          uuid.New().String(),
 			Title:       "title2",
 			Description: "description2",
-			DueData:     dueDate,
+			DueDate:     dueDate,
 			Priority:    3,
 			CreatedAt:   time.Now(),
 		},
@@ -218,8 +218,8 @@ func TestHandler_CreateTask(t *testing.T) { //nolint:gocognit // ignore cognitiv
 					if params.Description != "description" {
 						t.Errorf("unexpected Description: got %v, want %v", params.Description, "description")
 					}
-					if !params.DueData.Equal(dueDate) {
-						t.Errorf("unexpected DueData: got %v, want %v", params.DueData, dueDate)
+					if !params.DueDate.Equal(dueDate) {
+						t.Errorf("unexpected DueDate: got %v, want %v", params.DueDate, dueDate)
 					}
 					if params.Priority != 3 {
 						t.Errorf("unexpected Priority: got %v, want %v", params.Priority, 3)
@@ -335,8 +335,8 @@ func TestHandler_UpdateTask(t *testing.T) { //nolint:gocognit // ignore cognitiv
 					if params.Description != "updated description" {
 						t.Errorf("unexpected Description: got %v, want %v", params.Description, "description")
 					}
-					if !params.DueData.Equal(dueDate) {
-						t.Errorf("unexpected DueData: got %v, want %v", params.DueData, dueDate)
+					if !params.DueDate.Equal(dueDate) {
+						t.Errorf("unexpected DueDate: got %v, want %v", params.DueDate, dueDate)
 					}
 					if params.Priority != 2 {
 						t.Errorf("unexpected Priority: got %v, want %v", params.Priority, 3)

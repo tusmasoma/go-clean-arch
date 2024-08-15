@@ -50,12 +50,12 @@ func (tuc *taskUseCase) ListTasks(ctx context.Context) ([]entity.Task, error) {
 type CreateTaskParams struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	DueData     time.Time `json:"due_date"`
+	DueDate     time.Time `json:"due_date"`
 	Priority    int       `json:"priority"`
 }
 
 func (tuc *taskUseCase) CreateTask(ctx context.Context, params *CreateTaskParams) error {
-	task, err := entity.NewTask(params.Title, params.Description, params.DueData, params.Priority)
+	task, err := entity.NewTask(params.Title, params.Description, params.DueDate, params.Priority)
 	if err != nil {
 		log.Error("Failed to create task", log.Ferror(err))
 		return err
@@ -71,7 +71,7 @@ type UpdateTaskParams struct {
 	ID          string    `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	DueData     time.Time `json:"due_date"`
+	DueDate     time.Time `json:"due_date"`
 	Priority    int       `json:"priority"`
 }
 
@@ -84,7 +84,7 @@ func (tuc *taskUseCase) UpdateTask(ctx context.Context, params *UpdateTaskParams
 
 	task.Title = params.Title
 	task.Description = params.Description
-	task.DueData = params.DueData
+	task.DueDate = params.DueDate
 	task.Priority = params.Priority
 
 	if err = tuc.tr.Update(ctx, *task); err != nil {

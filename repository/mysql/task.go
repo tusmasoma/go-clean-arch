@@ -37,7 +37,7 @@ func (ur *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 		&task.ID,
 		&task.Title,
 		&task.Description,
-		&task.DueData,
+		&task.DueDate,
 		&task.Priority,
 		&task.CreatedAt,
 	); err != nil {
@@ -69,7 +69,7 @@ func (ur *taskRepository) List(ctx context.Context) ([]entity.Task, error) {
 			&task.ID,
 			&task.Title,
 			&task.Description,
-			&task.DueData,
+			&task.DueDate,
 			&task.Priority,
 			&task.CreatedAt,
 		); err != nil {
@@ -101,7 +101,7 @@ func (ur *taskRepository) Create(ctx context.Context, task entity.Task) error {
 		task.ID,
 		task.Title,
 		task.Description,
-		task.DueData,
+		task.DueDate,
 		task.Priority,
 		task.CreatedAt,
 	); err != nil {
@@ -126,7 +126,7 @@ func (ur *taskRepository) Update(ctx context.Context, task entity.Task) error {
 		query,
 		task.Title,
 		task.Description,
-		task.DueData,
+		task.DueDate,
 		task.Priority,
 		task.ID,
 	); err != nil {

@@ -24,7 +24,7 @@ func TestUseCase_GetTask(t *testing.T) {
 		ID:          taskID,
 		Title:       "title",
 		Description: "description",
-		DueData:     dueDate,
+		DueDate:     dueDate,
 		Priority:    3,
 		CreatedAt:   time.Now(),
 	}
@@ -104,7 +104,7 @@ func TestUseCase_ListTasks(t *testing.T) {
 			ID:          uuid.New().String(),
 			Title:       "title",
 			Description: "description",
-			DueData:     dueDate,
+			DueDate:     dueDate,
 			Priority:    3,
 			CreatedAt:   time.Now(),
 		},
@@ -201,8 +201,8 @@ func TestUseCase_CreateTask(t *testing.T) {
 					if task.Description != "description" {
 						t.Errorf("unexpected Description: got %v, want %v", task.Description, "description")
 					}
-					if !task.DueData.Equal(dueDate) {
-						t.Errorf("unexpected DueData: got %v, want %v", task.DueData, dueDate)
+					if !task.DueDate.Equal(dueDate) {
+						t.Errorf("unexpected DueDate: got %v, want %v", task.DueDate, dueDate)
 					}
 					if task.Priority != 3 {
 						t.Errorf("unexpected Priority: got %v, want %v", task.Priority, 3)
@@ -217,7 +217,7 @@ func TestUseCase_CreateTask(t *testing.T) {
 				params: &CreateTaskParams{
 					Title:       "title",
 					Description: "description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    3,
 				},
 			},
@@ -258,7 +258,7 @@ func TestUseCase_UpdateTask(t *testing.T) {
 		ID:          taskID,
 		Title:       "title",
 		Description: "description",
-		DueData:     dueDate,
+		DueDate:     dueDate,
 		Priority:    3,
 		CreatedAt:   time.Now(),
 	}
@@ -291,8 +291,8 @@ func TestUseCase_UpdateTask(t *testing.T) {
 					if task.Description != "updated description" {
 						t.Errorf("unexpected Description: got %v, want %v", task.Description, "updated description")
 					}
-					if !task.DueData.Equal(dueDate) {
-						t.Errorf("unexpected DueData: got %v, want %v", task.DueData, dueDate)
+					if !task.DueDate.Equal(dueDate) {
+						t.Errorf("unexpected DueDate: got %v, want %v", task.DueDate, dueDate)
 					}
 					if task.Priority != 2 {
 						t.Errorf("unexpected Priority: got %v, want %v", task.Priority, 2)
@@ -308,7 +308,7 @@ func TestUseCase_UpdateTask(t *testing.T) {
 					ID:          taskID,
 					Title:       "updated title",
 					Description: "updated description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    2,
 				},
 			},

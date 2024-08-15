@@ -33,7 +33,7 @@ type GetTaskResponse struct {
 	ID          string    `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	DueData     time.Time `json:"due_date"`
+	DueDate     time.Time `json:"due_date"`
 	Priority    int       `json:"priority"`
 	CreatedAt   time.Time `json:"created_at"`
 }
@@ -59,7 +59,7 @@ func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 		ID:          task.ID,
 		Title:       task.Title,
 		Description: task.Description,
-		DueData:     task.DueData,
+		DueDate:     task.DueDate,
 		Priority:    task.Priority,
 		CreatedAt:   task.CreatedAt,
 	}); err != nil {
@@ -74,7 +74,7 @@ type ListTasksResponse struct {
 		ID          string    `json:"id"`
 		Title       string    `json:"title"`
 		Description string    `json:"description"`
-		DueData     time.Time `json:"due_date"`
+		DueDate     time.Time `json:"due_date"`
 		Priority    int       `json:"priority"`
 		CreatedAt   time.Time `json:"created_at"`
 	} `json:"tasks"`
@@ -104,7 +104,7 @@ func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) List
 		ID          string    `json:"id"`
 		Title       string    `json:"title"`
 		Description string    `json:"description"`
-		DueData     time.Time `json:"due_date"`
+		DueDate     time.Time `json:"due_date"`
 		Priority    int       `json:"priority"`
 		CreatedAt   time.Time `json:"created_at"`
 	}
@@ -113,14 +113,14 @@ func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) List
 			ID          string    `json:"id"`
 			Title       string    `json:"title"`
 			Description string    `json:"description"`
-			DueData     time.Time `json:"due_date"`
+			DueDate     time.Time `json:"due_date"`
 			Priority    int       `json:"priority"`
 			CreatedAt   time.Time `json:"created_at"`
 		}{
 			ID:          task.ID,
 			Title:       task.Title,
 			Description: task.Description,
-			DueData:     task.DueData,
+			DueDate:     task.DueDate,
 			Priority:    task.Priority,
 			CreatedAt:   task.CreatedAt,
 		})
@@ -133,7 +133,7 @@ func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) List
 type CreateTaskRequest struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	DueData     time.Time `json:"due_date"`
+	DueDate     time.Time `json:"due_date"`
 	Priority    int       `json:"priority"`
 }
 
@@ -165,7 +165,7 @@ func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 func (th *taskHandler) isValidCreateTasksRequest(requestBody *CreateTaskRequest) bool {
 	if requestBody.Title == "" ||
 		requestBody.Description == "" ||
-		requestBody.DueData.IsZero() ||
+		requestBody.DueDate.IsZero() ||
 		requestBody.Priority < 1 ||
 		requestBody.Priority > 5 {
 		log.Warn("Invalid request body: %v", requestBody)
@@ -178,7 +178,7 @@ func (th *taskHandler) convertCreateTaskReqeuestToParams(req CreateTaskRequest) 
 	return &usecase.CreateTaskParams{
 		Title:       req.Title,
 		Description: req.Description,
-		DueData:     req.DueData,
+		DueDate:     req.DueDate,
 		Priority:    req.Priority,
 	}
 }
@@ -187,7 +187,7 @@ type UpdateTaskRequest struct {
 	ID          string    `json:"id"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	DueData     time.Time `json:"due_date"`
+	DueDate     time.Time `json:"due_date"`
 	Priority    int       `json:"priority"`
 }
 
@@ -220,7 +220,7 @@ func (th *taskHandler) isValidUpdateTasksRequest(requestBody *UpdateTaskRequest)
 	if requestBody.ID == "" ||
 		requestBody.Title == "" ||
 		requestBody.Description == "" ||
-		requestBody.DueData.IsZero() ||
+		requestBody.DueDate.IsZero() ||
 		requestBody.Priority < 1 ||
 		requestBody.Priority > 5 {
 		log.Warn("Invalid request body: %v", requestBody)
@@ -234,7 +234,7 @@ func (th *taskHandler) convertUpdateTaskReqeuestToParams(req UpdateTaskRequest) 
 		ID:          req.ID,
 		Title:       req.Title,
 		Description: req.Description,
-		DueData:     req.DueData,
+		DueDate:     req.DueDate,
 		Priority:    req.Priority,
 	}
 }

@@ -48,7 +48,7 @@ func (th *taskHandler) GetTask(ctx context.Context, req *pb.GetTaskRequest) (*pb
 		Id:          task.ID,
 		Title:       task.Title,
 		Description: task.Description,
-		DueDate:     timestamppb.New(task.DueData),
+		DueDate:     timestamppb.New(task.DueDate),
 		Priority:    int32(task.Priority),
 		CreatedAt:   timestamppb.New(task.CreatedAt),
 	}, nil
@@ -67,7 +67,7 @@ func (th *taskHandler) ListTasks(ctx context.Context, _ *pb.ListTasksRequest) (*
 			Id:          task.ID,
 			Title:       task.Title,
 			Description: task.Description,
-			DueDate:     timestamppb.New(task.DueData),
+			DueDate:     timestamppb.New(task.DueDate),
 			Priority:    int32(task.Priority),
 			CreatedAt:   timestamppb.New(task.CreatedAt),
 		})
@@ -111,7 +111,7 @@ func (th *taskHandler) convertCreateTaskReqeuestToParams(req *pb.CreateTaskReque
 	return &usecase.CreateTaskParams{
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
-		DueData:     req.GetDueDate().AsTime(),
+		DueDate:     req.GetDueDate().AsTime(),
 		Priority:    int(req.GetPriority()),
 	}
 }
@@ -154,7 +154,7 @@ func (th *taskHandler) convertUpdateTaskRequestToParams(req *pb.UpdateTaskReques
 		ID:          req.GetId(),
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
-		DueData:     req.GetDueDate().AsTime(),
+		DueDate:     req.GetDueDate().AsTime(),
 		Priority:    int(req.GetPriority()),
 	}
 }

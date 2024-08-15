@@ -12,14 +12,14 @@ import (
 func TestEntity_NewTask(t *testing.T) {
 	t.Parallel()
 
-	dueData := time.Now().AddDate(0, 0, 1)
+	dueDate := time.Now().AddDate(0, 0, 1)
 
 	patterns := []struct {
 		name string
 		arg  struct {
 			title       string
 			description string
-			dueData     time.Time
+			dueDate     time.Time
 			priority    int
 		}
 		want struct {
@@ -32,12 +32,12 @@ func TestEntity_NewTask(t *testing.T) {
 			arg: struct {
 				title       string
 				description string
-				dueData     time.Time
+				dueDate     time.Time
 				priority    int
 			}{
 				title:       "title",
 				description: "description",
-				dueData:     dueData,
+				dueDate:     dueDate,
 				priority:    3,
 			},
 			want: struct {
@@ -47,7 +47,7 @@ func TestEntity_NewTask(t *testing.T) {
 				task: &Task{
 					Title:       "title",
 					Description: "description",
-					DueData:     dueData,
+					DueDate:     dueDate,
 					Priority:    3,
 				},
 				err: nil,
@@ -58,12 +58,12 @@ func TestEntity_NewTask(t *testing.T) {
 			arg: struct {
 				title       string
 				description string
-				dueData     time.Time
+				dueDate     time.Time
 				priority    int
 			}{
 				title:       "",
 				description: "description",
-				dueData:     dueData,
+				dueDate:     dueDate,
 				priority:    3,
 			},
 			want: struct {
@@ -79,12 +79,12 @@ func TestEntity_NewTask(t *testing.T) {
 			arg: struct {
 				title       string
 				description string
-				dueData     time.Time
+				dueDate     time.Time
 				priority    int
 			}{
 				title:       "title",
 				description: "",
-				dueData:     dueData,
+				dueDate:     dueDate,
 				priority:    3,
 			},
 			want: struct {
@@ -100,12 +100,12 @@ func TestEntity_NewTask(t *testing.T) {
 			arg: struct {
 				title       string
 				description string
-				dueData     time.Time
+				dueDate     time.Time
 				priority    int
 			}{
 				title:       "title",
 				description: "description",
-				dueData:     dueData,
+				dueDate:     dueDate,
 				priority:    0,
 			},
 			want: struct {
@@ -121,12 +121,12 @@ func TestEntity_NewTask(t *testing.T) {
 			arg: struct {
 				title       string
 				description string
-				dueData     time.Time
+				dueDate     time.Time
 				priority    int
 			}{
 				title:       "title",
 				description: "description",
-				dueData:     dueData,
+				dueDate:     dueDate,
 				priority:    6,
 			},
 			want: struct {
@@ -144,7 +144,7 @@ func TestEntity_NewTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			task, err := NewTask(tt.arg.title, tt.arg.description, tt.arg.dueData, tt.arg.priority)
+			task, err := NewTask(tt.arg.title, tt.arg.description, tt.arg.dueDate, tt.arg.priority)
 
 			if (err != nil) != (tt.want.err != nil) {
 				t.Errorf("NewTask() error = %v, wantErr %v", err, tt.want.err)

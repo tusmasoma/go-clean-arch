@@ -29,7 +29,7 @@ func TestHandler_GetTask(t *testing.T) {
 		ID:          taskID,
 		Title:       "title",
 		Description: "description",
-		DueData:     dueDate,
+		DueDate:     dueDate,
 		Priority:    3,
 		CreatedAt:   time.Now(),
 	}
@@ -103,7 +103,7 @@ func TestHandler_ListTasks(t *testing.T) {
 			ID:          uuid.New().String(),
 			Title:       "title1",
 			Description: "description1",
-			DueData:     dueDate,
+			DueDate:     dueDate,
 			Priority:    3,
 			CreatedAt:   time.Now(),
 		},
@@ -111,7 +111,7 @@ func TestHandler_ListTasks(t *testing.T) {
 			ID:          uuid.New().String(),
 			Title:       "title2",
 			Description: "description2",
-			DueData:     dueDate,
+			DueDate:     dueDate,
 			Priority:    3,
 			CreatedAt:   time.Now(),
 		},
@@ -193,8 +193,8 @@ func TestHandler_CreateTask(t *testing.T) {
 					if params.Description != "description" {
 						t.Errorf("unexpected Description: got %v, want %v", params.Description, "description")
 					}
-					if !params.DueData.Equal(dueDate) {
-						t.Errorf("unexpected DueData: got %v, want %v", params.DueData, dueDate)
+					if !params.DueDate.Equal(dueDate) {
+						t.Errorf("unexpected DueDate: got %v, want %v", params.DueDate, dueDate)
 					}
 					if params.Priority != 3 {
 						t.Errorf("unexpected Priority: got %v, want %v", params.Priority, 3)
@@ -205,7 +205,7 @@ func TestHandler_CreateTask(t *testing.T) {
 				taskCreateReq := CreateTaskRequest{
 					Title:       "title",
 					Description: "description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    3,
 				}
 				reqBody, _ := json.Marshal(taskCreateReq)
@@ -221,7 +221,7 @@ func TestHandler_CreateTask(t *testing.T) {
 				taskCreateReq := CreateTaskRequest{
 					Title:       "",
 					Description: "description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    3,
 				}
 				reqBody, _ := json.Marshal(taskCreateReq)
@@ -237,7 +237,7 @@ func TestHandler_CreateTask(t *testing.T) {
 				taskCreateReq := CreateTaskRequest{
 					Title:       "title",
 					Description: "",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    3,
 				}
 				reqBody, _ := json.Marshal(taskCreateReq)
@@ -253,7 +253,7 @@ func TestHandler_CreateTask(t *testing.T) {
 				taskCreateReq := CreateTaskRequest{
 					Title:       "title",
 					Description: "description",
-					DueData:     time.Time{},
+					DueDate:     time.Time{},
 					Priority:    3,
 				}
 				reqBody, _ := json.Marshal(taskCreateReq)
@@ -269,7 +269,7 @@ func TestHandler_CreateTask(t *testing.T) {
 				taskCreateReq := CreateTaskRequest{
 					Title:       "title",
 					Description: "description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    0,
 				}
 				reqBody, _ := json.Marshal(taskCreateReq)
@@ -285,7 +285,7 @@ func TestHandler_CreateTask(t *testing.T) {
 				taskCreateReq := CreateTaskRequest{
 					Title:       "title",
 					Description: "description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    6,
 				}
 				reqBody, _ := json.Marshal(taskCreateReq)
@@ -351,8 +351,8 @@ func TestHandler_UpdateTask(t *testing.T) {
 					if params.Description != "updated description" {
 						t.Errorf("unexpected Description: got %v, want %v", params.Description, "description")
 					}
-					if !params.DueData.Equal(dueDate) {
-						t.Errorf("unexpected DueData: got %v, want %v", params.DueData, dueDate)
+					if !params.DueDate.Equal(dueDate) {
+						t.Errorf("unexpected DueDate: got %v, want %v", params.DueDate, dueDate)
 					}
 					if params.Priority != 2 {
 						t.Errorf("unexpected Priority: got %v, want %v", params.Priority, 3)
@@ -364,7 +364,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					ID:          taskID,
 					Title:       "updated title",
 					Description: "updated description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    2,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
@@ -381,7 +381,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					ID:          "",
 					Title:       "updated title",
 					Description: "updated description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    2,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
@@ -398,7 +398,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					ID:          taskID,
 					Title:       "",
 					Description: "updated description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    2,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
@@ -415,7 +415,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					ID:          taskID,
 					Title:       "updated title",
 					Description: "",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    2,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
@@ -432,7 +432,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					ID:          taskID,
 					Title:       "updated title",
 					Description: "updated description",
-					DueData:     time.Time{},
+					DueDate:     time.Time{},
 					Priority:    2,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
@@ -449,7 +449,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					ID:          taskID,
 					Title:       "updated title",
 					Description: "updated description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    0,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
@@ -466,7 +466,7 @@ func TestHandler_UpdateTask(t *testing.T) {
 					ID:          taskID,
 					Title:       "updated title",
 					Description: "updated description",
-					DueData:     dueDate,
+					DueDate:     dueDate,
 					Priority:    6,
 				}
 				reqBody, _ := json.Marshal(taskUpdateReq)
