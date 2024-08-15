@@ -35,7 +35,6 @@ In the "dependency rules," the direction of dependencies in the source code shou
 
 **Dependency Injection** is a technique where the dependencies required by a class or component are provided from outside. This prevents a class from creating its dependencies or becoming tied to specific implementations. Using Dependency Injection makes it easier to manage dependencies and keeps the coupling between modules low.
 
----
 
 ### Benefits of Clean Architecture
 
@@ -47,7 +46,6 @@ By achieving "separation of concerns," the following benefits can be realized:
 4. **Database Independence**: You can easily switch from Oracle or SQL Server to MongoDB, BigTable, CouchDB, etc. The business rules are not dependent on the database.
 5. **External Function Independence**: The business rules are independent of external elements and do not need to know anything about the external systems.
 
----
 
 ## This Project
 
@@ -88,7 +86,6 @@ Changes in the Interfaces Layer are expected not to affect other layers.
 
 The Interfaces Layer corresponds to both **Interface Adapters** and **Frameworks & Drivers** in the Clean Architecture diagram.
 
----
 
 ### Dependencies
 
@@ -101,7 +98,6 @@ The dependencies between the layers are as follows:
 - **Solid Arrows**: Indicate direct dependencies. These are used when one layer directly depends on another layer or component.
 - **Dashed Arrows**: Indicate indirect dependencies or abstracted dependencies. For instance, the Usecase Layer depends on the interfaces in the Repository Layer but does not depend on the specific implementation.
 
----
 
 ## In Progress
 
