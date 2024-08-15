@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+package task;
+
+option go_package = "/gateway";
+
+service TaskService {
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse){
+    option (google.api.http) = {
+      get: "/api/task/get/{id}"
+    };
+  }
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse){
+    option (google.api.http) = {
+      get: "/api/task/list"
+    };
+  }
+  rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse){
+    option (google.api.http) = {
+      post: "/api/task/create"
+      body: "*"
+    };
+  }
+  rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse){
+    option (google.api.http) = {
+      put: "/api/task/update"
+      body: "*"
+    };
+  }
+  rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse){
+    option (google.api.http) = {
+      delete: "/api/task/delete/{id}"
+    };
+  }
+}
+
+message GetTaskRequest {
+  string id = 1;
+}
+
+message GetTaskResponse {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  google.protobuf.Timestamp due_date = 4;
+  int32 priority = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message ListTasksRequest {}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+}
+
+message Task {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  google.protobuf.Timestamp due_date = 4;
+  int32 priority = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message CreateTaskRequest {
+  string title = 1;
+  string description = 2;
+  google.protobuf.Timestamp due_date = 3;
+  int32 priority = 4;
+}
+
+message CreateTaskResponse {}
+
+message UpdateTaskRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  google.protobuf.Timestamp due_date = 4;
+  int32 priority = 5;
+}
+
+message UpdateTaskResponse {}
+
+message DeleteTaskRequest {
+  string id = 1;
+}
+
+message DeleteTaskResponse {}
