@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/tusmasoma/go-clean-arch/entity"
 	pb "github.com/tusmasoma/go-clean-arch/interfaces/handler/grpc/proto/gateway"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 )
@@ -93,8 +94,7 @@ func (th *taskHandler) isValidCreateTasksRequest(req *pb.CreateTaskRequest) bool
 	if req.GetTitle() == "" ||
 		req.GetDescription() == "" ||
 		req.GetDueDate().AsTime().IsZero() ||
-		int(req.GetPriority()) < 1 ||
-		int(req.GetPriority()) > 5 {
+		!entity.ValidPriorities[entity.Priority(req.GetPriority())] {
 		log.Warn(
 			"Invalid request",
 			log.Fstring("title", req.GetTitle()),
@@ -112,7 +112,7 @@ func (th *taskHandler) convertCreateTaskReqeuestToParams(req *pb.CreateTaskReque
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
 		DueDate:     req.GetDueDate().AsTime(),
-		Priority:    int(req.GetPriority()),
+		Priority:    entity.Priority(req.GetPriority()),
 	}
 }
 
@@ -134,8 +134,7 @@ func (th *taskHandler) isValidUpdateTasksRequest(req *pb.UpdateTaskRequest) bool
 		req.GetTitle() == "" ||
 		req.GetDescription() == "" ||
 		req.GetDueDate().AsTime().IsZero() ||
-		int(req.GetPriority()) < 1 ||
-		int(req.GetPriority()) > 5 {
+		!entity.ValidPriorities[entity.Priority(req.GetPriority())] {
 		log.Warn(
 			"Invalid request",
 			log.Fstring("id", req.GetId()),
@@ -155,7 +154,7 @@ func (th *taskHandler) convertUpdateTaskRequestToParams(req *pb.UpdateTaskReques
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
 		DueDate:     req.GetDueDate().AsTime(),
-		Priority:    int(req.GetPriority()),
+		Priority:    entity.Priority(req.GetPriority()),
 	}
 }
 

@@ -48,10 +48,10 @@ func (tuc *taskUseCase) ListTasks(ctx context.Context) ([]entity.Task, error) {
 }
 
 type CreateTaskParams struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	DueDate     time.Time `json:"due_date"`
-	Priority    int       `json:"priority"`
+	Title       string          `json:"title"`
+	Description string          `json:"description"`
+	DueDate     time.Time       `json:"due_date"`
+	Priority    entity.Priority `json:"priority"`
 }
 
 func (tuc *taskUseCase) CreateTask(ctx context.Context, params *CreateTaskParams) error {
@@ -68,11 +68,11 @@ func (tuc *taskUseCase) CreateTask(ctx context.Context, params *CreateTaskParams
 }
 
 type UpdateTaskParams struct {
-	ID          string    `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	DueDate     time.Time `json:"due_date"`
-	Priority    int       `json:"priority"`
+	ID          string          `json:"id"`
+	Title       string          `json:"title"`
+	Description string          `json:"description"`
+	DueDate     time.Time       `json:"due_date"`
+	Priority    entity.Priority `json:"priority"`
 }
 
 func (tuc *taskUseCase) UpdateTask(ctx context.Context, params *UpdateTaskParams) error {
