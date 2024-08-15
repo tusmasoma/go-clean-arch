@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	pb "github.com/tusmasoma/go-clean-arch/proto"
+	pb "github.com/tusmasoma/go-clean-arch/proto/gateway"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 )
 

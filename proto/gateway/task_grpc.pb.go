@@ -4,7 +4,7 @@
 // - protoc             v4.25.3
 // source: task.proto
 
-package proto
+package gateway
 
 import (
 	context "context"
