@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
-	pb "github.com/tusmasoma/go-clean-arch/proto/gateway"
+	pb "github.com/tusmasoma/go-clean-arch/interfaces/handler/grpc/proto/gateway"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 	"github.com/tusmasoma/go-clean-arch/usecase/mock"
 )
