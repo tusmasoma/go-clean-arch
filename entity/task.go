@@ -8,6 +8,30 @@ import (
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
+// The introduction of a custom Priority type was considered,
+// but it requires additional implementation for JSON decoding.
+// Therefore, for now, the standard int type is being used.
+// Introducing a Priority type in the future could improve code readability and safety,
+// so this decision should be revisited.
+//
+// type Priority int
+//
+// const (
+// 	Low Priority = iota + 1
+// 	MediumLow
+// 	Medium
+// 	MediumHigh
+// 	High
+// )
+//
+// var ValidPriorities = map[Priority]bool{
+// 	Low:        true,
+// 	MediumLow:  true,
+// 	Medium:     true,
+// 	MediumHigh: true,
+// 	High:       true,
+// }
+
 const (
 	Low int = iota + 1
 	MediumLow
