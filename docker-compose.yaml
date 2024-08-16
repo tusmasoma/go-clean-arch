@@ -20,20 +20,20 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
-  postgres:
-    container_name: todo_postgres
-    image: postgres:13
-    platform: linux/amd64
-    ports:
-      - 5432:5432
-    volumes:
-      - ./repository/postgres/init/:/docker-entrypoint-initdb.d
-      - ./repository/postgres/init/postgresql.cnf:/etc/postgresql/postgresql.conf
-      - db-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
+  # postgres:
+  #   container_name: todo_postgres
+  #   image: postgres:13
+  #   platform: linux/amd64
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - ./repository/postgres/init/:/docker-entrypoint-initdb.d
+  #     - ./repository/postgres/init/postgresql.cnf:/etc/postgresql/postgresql.conf
+  #     - db-data:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB_NAME}
 
   back:
     container_name: todo_back
@@ -48,6 +48,16 @@ services:
       - .env
     depends_on:
       - mysql
+
+  swagger-ui:
+    container_name: chat_swagger_ui
+    image: swaggerapi/swagger-ui:latest
+    ports:
+      - 3000:8080
+    environment:
+      SWAGGER_JSON: /api/api-document.yaml
+    volumes:
+      - ./docs/api-document.yaml:/api/api-document.yaml:ro
 
 volumes:
   db-data:

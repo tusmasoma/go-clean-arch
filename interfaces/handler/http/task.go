@@ -30,12 +30,12 @@ func NewTaskHandler(tuc usecase.TaskUseCase) TaskHandler {
 }
 
 type GetTaskResponse struct {
-	ID          string          `json:"id"`
-	Title       string          `json:"title"`
-	Description string          `json:"description"`
-	DueDate     time.Time       `json:"due_date"`
-	Priority    entity.Priority `json:"priority"`
-	CreatedAt   time.Time       `json:"created_at"`
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
@@ -71,12 +71,12 @@ func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 
 type ListTasksResponse struct {
 	Tasks []struct {
-		ID          string          `json:"id"`
-		Title       string          `json:"title"`
-		Description string          `json:"description"`
-		DueDate     time.Time       `json:"due_date"`
-		Priority    entity.Priority `json:"priority"`
-		CreatedAt   time.Time       `json:"created_at"`
+		ID          string    `json:"id"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		DueDate     time.Time `json:"due_date"`
+		Priority    int       `json:"priority"`
+		CreatedAt   time.Time `json:"created_at"`
 	} `json:"tasks"`
 }
 
@@ -101,21 +101,21 @@ func (th *taskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
 
 func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) ListTasksResponse {
 	var tasksResponse []struct {
-		ID          string          `json:"id"`
-		Title       string          `json:"title"`
-		Description string          `json:"description"`
-		DueDate     time.Time       `json:"due_date"`
-		Priority    entity.Priority `json:"priority"`
-		CreatedAt   time.Time       `json:"created_at"`
+		ID          string    `json:"id"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		DueDate     time.Time `json:"due_date"`
+		Priority    int       `json:"priority"`
+		CreatedAt   time.Time `json:"created_at"`
 	}
 	for _, task := range tasks {
 		tasksResponse = append(tasksResponse, struct {
-			ID          string          `json:"id"`
-			Title       string          `json:"title"`
-			Description string          `json:"description"`
-			DueDate     time.Time       `json:"due_date"`
-			Priority    entity.Priority `json:"priority"`
-			CreatedAt   time.Time       `json:"created_at"`
+			ID          string    `json:"id"`
+			Title       string    `json:"title"`
+			Description string    `json:"description"`
+			DueDate     time.Time `json:"due_date"`
+			Priority    int       `json:"priority"`
+			CreatedAt   time.Time `json:"created_at"`
 		}{
 			ID:          task.ID,
 			Title:       task.Title,
@@ -131,10 +131,10 @@ func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) List
 }
 
 type CreateTaskRequest struct {
-	Title       string          `json:"title"`
-	Description string          `json:"description"`
-	DueDate     time.Time       `json:"due_date"`
-	Priority    entity.Priority `json:"priority"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
 }
 
 func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
@@ -183,11 +183,11 @@ func (th *taskHandler) convertCreateTaskReqeuestToParams(req CreateTaskRequest) 
 }
 
 type UpdateTaskRequest struct {
-	ID          string          `json:"id"`
-	Title       string          `json:"title"`
-	Description string          `json:"description"`
-	DueDate     time.Time       `json:"due_date"`
-	Priority    entity.Priority `json:"priority"`
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
 }
 
 func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {

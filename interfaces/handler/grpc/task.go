@@ -94,7 +94,7 @@ func (th *taskHandler) isValidCreateTasksRequest(req *pb.CreateTaskRequest) bool
 	if req.GetTitle() == "" ||
 		req.GetDescription() == "" ||
 		req.GetDueDate().AsTime().IsZero() ||
-		!entity.ValidPriorities[entity.Priority(req.GetPriority())] {
+		!entity.ValidPriorities[int(req.GetPriority())] {
 		log.Warn(
 			"Invalid request",
 			log.Fstring("title", req.GetTitle()),
@@ -112,7 +112,7 @@ func (th *taskHandler) convertCreateTaskReqeuestToParams(req *pb.CreateTaskReque
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
 		DueDate:     req.GetDueDate().AsTime(),
-		Priority:    entity.Priority(req.GetPriority()),
+		Priority:    int(req.GetPriority()),
 	}
 }
 
@@ -134,7 +134,7 @@ func (th *taskHandler) isValidUpdateTasksRequest(req *pb.UpdateTaskRequest) bool
 		req.GetTitle() == "" ||
 		req.GetDescription() == "" ||
 		req.GetDueDate().AsTime().IsZero() ||
-		!entity.ValidPriorities[entity.Priority(req.GetPriority())] {
+		!entity.ValidPriorities[int(req.GetPriority())] {
 		log.Warn(
 			"Invalid request",
 			log.Fstring("id", req.GetId()),
@@ -154,7 +154,7 @@ func (th *taskHandler) convertUpdateTaskRequestToParams(req *pb.UpdateTaskReques
 		Title:       req.GetTitle(),
 		Description: req.GetDescription(),
 		DueDate:     req.GetDueDate().AsTime(),
-		Priority:    entity.Priority(req.GetPriority()),
+		Priority:    int(req.GetPriority()),
 	}
 }
 

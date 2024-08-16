@@ -49,7 +49,7 @@ func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 				ExposedHeaders:     []string{"Link", "Authorization"},
 				AllowCredentials:   true,
 				MaxAge:             serverConfig.PreflightCacheDurationSec,
-				OptionsPassthrough: true,
+				OptionsPassthrough: false,
 			}))
 			r.Use(middleware.Logging)
 

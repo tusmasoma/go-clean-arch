@@ -20,7 +20,7 @@ func TestEntity_NewTask(t *testing.T) {
 			title       string
 			description string
 			dueDate     time.Time
-			priority    Priority
+			priority    int
 		}
 		want struct {
 			task *Task
@@ -33,7 +33,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title       string
 				description string
 				dueDate     time.Time
-				priority    Priority
+				priority    int
 			}{
 				title:       "title",
 				description: "description",
@@ -59,7 +59,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title       string
 				description string
 				dueDate     time.Time
-				priority    Priority
+				priority    int
 			}{
 				title:       "",
 				description: "description",
@@ -80,7 +80,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title       string
 				description string
 				dueDate     time.Time
-				priority    Priority
+				priority    int
 			}{
 				title:       "title",
 				description: "",
@@ -101,7 +101,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title       string
 				description string
 				dueDate     time.Time
-				priority    Priority
+				priority    int
 			}{
 				title:       "title",
 				description: "description",
@@ -122,7 +122,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title       string
 				description string
 				dueDate     time.Time
-				priority    Priority
+				priority    int
 			}{
 				title:       "title",
 				description: "description",

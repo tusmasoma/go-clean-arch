@@ -1,0 +1,164 @@
+openapi: 3.0.2
+info:
+  title: Go Clean Architecture API
+  description: <b>Go Clean Architecture API仕様書</b><br>
+  version: 1.0.0
+servers:
+  - url: http://localhost:8083/
+tags:
+  - name: task
+    description: タスク関連API
+paths:
+  /api/task/get:
+    get:
+      tags:
+        - task
+      summary: タスク取得API
+      description: |
+        URLクエリのid情報を元にタスク情報を取得します。
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: タスクID
+      responses:
+        200:
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTaskResponse'
+  /api/task/list:
+    get:
+      tags:
+        - task
+      summary: タスク一覧取得API
+      description: |
+        タスク情報を一覧で取得します。
+      responses:
+        200:
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTasksResponse'
+  /api/task/create:
+    post:
+      tags:
+        - task
+      summary: タスク作成API
+      description: |
+        タスク情報を作成します。
+      requestBody:
+        description: Request Body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+        required: true
+      responses:
+        200:
+          description: A successful response.
+  /api/task/update:
+    put:
+      tags:
+        - task
+      summary: タスク更新API
+      description: |
+        タスク情報を更新します。
+      requestBody:
+        description: Request Body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+        required: true
+      responses:
+        200:
+          description: A successful response.
+  /api/task/delete:
+    delete:
+      tags:
+        - task
+      summary: タスク削除API
+      description: |
+        URLクエリのid情報を元にタスク情報を削除します。
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: タスクID
+      responses:
+        200:
+          description: A successful response.
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    GetTaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "12345"
+        title:
+          type: string
+          example: "タスクタイトル"
+        description:
+          type: string
+          example: "タスクの説明"
+        due_date:
+          type: string
+          example: "2021-01-01T00:00:00Z"
+        priority:
+          type: string
+          example: "high"
+        created_at:
+          type: string
+          example: "2021-01-01T00:00:00Z"
+    ListTasksResponse:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetTaskResponse'
+    CreateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: タスクタイトル
+        description:
+          type: string
+          description: タスクの説明
+        due_date:
+          type: string
+          description: タスクの期限
+        priority:
+          type: integer
+          description: タスクの優先度
+    UpdateTaskRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: タスクID
+        title:
+          type: string
+          description: タスクタイトル
+        description:
+          type: string
+          description: タスクの説明
+        due_date:
+          type: string
+          description: タスクの期限
+        priority:
+          type: integer
+          description: タスクの優先度

@@ -8,17 +8,15 @@ import (
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
-type Priority int
-
 const (
-	Low Priority = iota + 1
+	Low int = iota + 1
 	MediumLow
 	Medium
 	MediumHigh
 	High
 )
 
-var ValidPriorities = map[Priority]bool{
+var ValidPriorities = map[int]bool{
 	Low:        true,
 	MediumLow:  true,
 	Medium:     true,
@@ -31,11 +29,11 @@ type Task struct {
 	Title       string    `json:"title" db:"title"`
 	Description string    `json:"description" db:"description"`
 	DueDate     time.Time `json:"due_date" db:"duedate"`
-	Priority    Priority  `json:"priority" db:"priority"`
+	Priority    int       `json:"priority" db:"priority"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 }
 
-func NewTask(title, description string, dueDate time.Time, priority Priority) (*Task, error) {
+func NewTask(title, description string, dueDate time.Time, priority int) (*Task, error) {
 	if title == "" {
 		log.Error("title is required")
 		return nil, errors.New("title is required")
