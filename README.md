@@ -98,6 +98,17 @@ The dependencies between the layers are as follows:
 - **Solid Arrows**: Indicate direct dependencies. These are used when one layer directly depends on another layer or component.
 - **Dashed Arrows**: Indicate indirect dependencies or abstracted dependencies. For instance, the Usecase Layer depends on the interfaces in the Repository Layer but does not depend on the specific implementation.
 
+> [!NOTE]
+> We allow the use of methods across layers (e.g., interfaces -> entity) as long as the direction of dependencies is correct. This is because strictly managing dependencies can lead to numerous conversions within each layer, potentially making the code more redundant.
+
+> [!NOTE]
+> In this project, the Repository interface is implemented within the Repository Layer. Therefore, while it may appear that the Usecase Layer depends on the Repository Layer, it actually only depends on abstract interfaces, not concrete implementations. This approach adheres to the dependency rule. If you wish to manage dependencies more strictly, it is advisable to place the Repository interfaces as follows:
+>
+> ```
+> ./entity/
+> ├─ model/
+> └─ repository/
+> ```
 
 ## In Progress
 
