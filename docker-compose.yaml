@@ -6,6 +6,13 @@ services:
     ports:
       - 6379:6379
 
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+
   mysql:
     container_name: todo_mysql
     image: mysql:5.7
@@ -60,5 +67,7 @@ services:
       - ./docs/api-document.yaml:/api/api-document.yaml:ro
 
 volumes:
+  mongo_data:
+    driver: local
   db-data:
     driver: local
