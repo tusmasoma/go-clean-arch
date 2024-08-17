@@ -49,12 +49,12 @@ var ValidPriorities = map[int]bool{
 }
 
 type Task struct {
-	ID          string    `json:"id" db:"id"`
-	Title       string    `json:"title" db:"title"`
-	Description string    `json:"description" db:"description"`
-	DueDate     time.Time `json:"due_date" db:"duedate"`
-	Priority    int       `json:"priority" db:"priority"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	ID          string    `json:"id" db:"id" bson:"_id,omitempty"`
+	Title       string    `json:"title" db:"title" bson:"title"`
+	Description string    `json:"description" db:"description" bson:"description"`
+	DueDate     time.Time `json:"due_date" db:"duedate" bson:"duedate"`
+	Priority    int       `json:"priority" db:"priority" bson:"priority"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at" bson:"created_at"`
 }
 
 func NewTask(title, description string, dueDate time.Time, priority int) (*Task, error) {

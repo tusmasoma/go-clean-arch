@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	serverPrefix = "SERVER_"
+	mongoDBPrefix = "MONGO_DB_"
+	serverPrefix  = "SERVER_"
 )
 
 type DBConfig struct {
@@ -19,6 +20,14 @@ type DBConfig struct {
 	User     string `env:"USER, required"`
 	Password string `env:"PASSWORD, required"`
 	DBName   string `env:"DB_NAME, required"`
+}
+
+type MongoDB struct {
+	URI        string `env:"URI, required"`
+	Password   string `env:"PASSWORD"`
+	User       string `env:"USER"`
+	Database   string `env:"DATABASE, required"`
+	Collection string `env:"COLLECTION, required"`
 }
 
 type CacheConfig struct {
@@ -42,6 +51,17 @@ func NewDBConfig(ctx context.Context, dbPrefix string) (*DBConfig, error) {
 		log.Error("Failed to load database config", log.Ferror(err))
 		return nil, err
 	}
+	return conf, nil
+}
+
+func NewMongoDB(ctx context.Context) (*MongoDB, error) {
+	conf := &MongoDB{}
+	pl := envconfig.PrefixLookuper(mongoDBPrefix, envconfig.OsLookuper())
+	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+		log.Error("Failed to load MongoDB config", log.Ferror(err))
+		return nil, err
+	}
+
 	return conf, nil
 }
 
