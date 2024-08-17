@@ -1,28 +1,28 @@
 openapi: 3.0.2
 info:
   title: Go Clean Architecture API
-  description: <b>Go Clean Architecture API仕様書</b><br>
+  description: <b>Go Clean Architecture API Documentation</b><br>
   version: 1.0.0
 servers:
   - url: http://localhost:8083/
 tags:
   - name: task
-    description: タスク関連API
+    description: Task-related APIs
 paths:
   /api/task/get:
     get:
       tags:
         - task
-      summary: タスク取得API
+      summary: Task Retrieval API
       description: |
-        URLクエリのid情報を元にタスク情報を取得します。
+        Retrieves task information based on the ID provided in the URL query.
       parameters:
         - name: id
           in: query
           required: true
           schema:
             type: string
-          description: タスクID
+          description: Task ID
       responses:
         200:
           description: A successful response.
@@ -34,9 +34,9 @@ paths:
     get:
       tags:
         - task
-      summary: タスク一覧取得API
+      summary: Task List Retrieval API
       description: |
-        タスク情報を一覧で取得します。
+        Retrieves a list of task information.
       responses:
         200:
           description: A successful response.
@@ -48,9 +48,9 @@ paths:
     post:
       tags:
         - task
-      summary: タスク作成API
+      summary: Task Creation API
       description: |
-        タスク情報を作成します。
+        Creates task information.
       requestBody:
         description: Request Body
         content:
@@ -65,9 +65,9 @@ paths:
     put:
       tags:
         - task
-      summary: タスク更新API
+      summary: Task Update API
       description: |
-        タスク情報を更新します。
+        Updates task information.
       requestBody:
         description: Request Body
         content:
@@ -82,16 +82,16 @@ paths:
     delete:
       tags:
         - task
-      summary: タスク削除API
+      summary: Task Deletion API
       description: |
-        URLクエリのid情報を元にタスク情報を削除します。
+        Deletes task information based on the ID provided in the URL query.
       parameters:
         - name: id
           in: query
           required: true
           schema:
             type: string
-          description: タスクID
+          description: Task ID
       responses:
         200:
           description: A successful response.
@@ -109,16 +109,16 @@ components:
           example: "12345"
         title:
           type: string
-          example: "タスクタイトル"
+          example: "Task Title"
         description:
           type: string
-          example: "タスクの説明"
+          example: "Task Description"
         due_date:
           type: string
           example: "2021-01-01T00:00:00Z"
         priority:
-          type: string
-          example: "high"
+          type: integer
+          example: 1
         created_at:
           type: string
           example: "2021-01-01T00:00:00Z"
@@ -134,31 +134,40 @@ components:
       properties:
         title:
           type: string
-          description: タスクタイトル
+          description: Task title
+          example: "Task Title"
         description:
           type: string
-          description: タスクの説明
+          description: Task description
+          example: "Task Description"
         due_date:
           type: string
-          description: タスクの期限
+          description: Task due date
+          example: "2021-01-01T00:00:00Z"
         priority:
           type: integer
-          description: タスクの優先度
+          description: Task priority
+          example: 1
     UpdateTaskRequest:
       type: object
       properties:
         id:
           type: string
-          description: タスクID
+          description: Task ID
+          example: "12345"
         title:
           type: string
-          description: タスクタイトル
+          description: Task title
+          example: "Task Title"
         description:
           type: string
-          description: タスクの説明
+          description: Task description
+          example: "Task Description"
         due_date:
           type: string
-          description: タスクの期限
+          description: Task due date
+          example: "2021-01-01T00:00:00Z"
         priority:
           type: integer
-          description: タスクの優先度
+          description: Task priority
+          example: 1
