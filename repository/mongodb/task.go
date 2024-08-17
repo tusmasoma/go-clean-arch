@@ -10,11 +10,11 @@ import (
 )
 
 type taskRepository struct {
-	client Client
+	client *Client
 	table  string
 }
 
-func NewTaskRepository(client Client) repository.TaskRepository {
+func NewTaskRepository(client *Client) repository.TaskRepository {
 	return &taskRepository{
 		client: client,
 		table:  "Tasks",

@@ -21,7 +21,7 @@ func Test_TaskRepository(t *testing.T) {
 	var cli Client
 	cli.cli = client
 	cli.db = "goCleanArcTestDB"
-	repo := NewTaskRepository(cli)
+	repo := NewTaskRepository(&cli)
 
 	task1, err := entity.NewTask(
 		"First Task",
