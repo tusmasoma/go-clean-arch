@@ -2,16 +2,21 @@ version: "3"
 
 services:
   redis:
+    container_name: todo_redis
     image: redis:5.0
     ports:
       - 6379:6379
 
   mongo:
+    container_name: todo_mongo
     image: mongo:latest
     ports:
       - 27017:27017
     volumes:
       - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: go-clean-arc
 
   mysql:
     container_name: todo_mysql
@@ -55,6 +60,7 @@ services:
       - .env
     depends_on:
       - mysql
+      - mongo
 
   swagger-ui:
     container_name: chat_swagger_ui
