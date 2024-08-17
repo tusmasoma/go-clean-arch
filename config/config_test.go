@@ -60,6 +60,57 @@ func Test_NewDBConfig(t *testing.T) {
 	}
 }
 
+func Test_NewMongoDB(t *testing.T) {
+	ctx := context.Background()
+
+	patterns := []struct {
+		name  string
+		setup func(t *testing.T)
+		want  *MongoDB
+		err   error
+	}{
+		{
+			name: "default",
+			setup: func(t *testing.T) {
+				t.Helper()
+			},
+			want: nil,
+			err:  envconfig.ErrMissingRequired,
+		},
+		{
+			name: "set envs",
+			setup: func(t *testing.T) {
+				t.Helper()
+				t.Setenv("MONGO_DB_URI", "mongodb://localhost:27017")
+				t.Setenv("MONGO_DB_USER", "root")
+				t.Setenv("MONGO_DB_PASSWORD", "pass")
+				t.Setenv("MONGO_DB_DATABASE", "database")
+				t.Setenv("MONGO_DB_COLLECTION", "col")
+			},
+			want: &MongoDB{
+				URI:        "mongodb://localhost:27017",
+				Password:   "pass",
+				User:       "root",
+				Database:   "database",
+				Collection: "col",
+			},
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setup(t)
+
+			got, err := NewMongoDB(ctx)
+			if err != nil {
+				require.ErrorIs(t, err, tt.err)
+			}
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func Test_NewCacheConfig(t *testing.T) {
 	ctx := context.Background()
 
