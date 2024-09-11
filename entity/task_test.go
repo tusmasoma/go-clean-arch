@@ -7,16 +7,19 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
 )
 
 func TestEntity_NewTask(t *testing.T) {
 	t.Parallel()
 
+	userID := uuid.New().String()
 	dueDate := time.Now().AddDate(0, 0, 1)
 
 	patterns := []struct {
 		name string
 		arg  struct {
+			userID      string
 			title       string
 			description string
 			dueDate     time.Time
@@ -30,11 +33,13 @@ func TestEntity_NewTask(t *testing.T) {
 		{
 			name: "success",
 			arg: struct {
+				userID      string
 				title       string
 				description string
 				dueDate     time.Time
 				priority    int
 			}{
+				userID:      userID,
 				title:       "title",
 				description: "description",
 				dueDate:     dueDate,
@@ -45,6 +50,7 @@ func TestEntity_NewTask(t *testing.T) {
 				err  error
 			}{
 				task: &Task{
+					UserID:      userID,
 					Title:       "title",
 					Description: "description",
 					DueDate:     dueDate,
@@ -54,13 +60,38 @@ func TestEntity_NewTask(t *testing.T) {
 			},
 		},
 		{
-			name: "Fail: title is empty",
+			name: "Fail: userID is empty",
 			arg: struct {
+				userID      string
 				title       string
 				description string
 				dueDate     time.Time
 				priority    int
 			}{
+				userID:      "",
+				title:       "title",
+				description: "description",
+				dueDate:     dueDate,
+				priority:    Medium,
+			},
+			want: struct {
+				task *Task
+				err  error
+			}{
+				task: nil,
+				err:  errors.New("userID is required"),
+			},
+		},
+		{
+			name: "Fail: title is empty",
+			arg: struct {
+				userID      string
+				title       string
+				description string
+				dueDate     time.Time
+				priority    int
+			}{
+				userID:      userID,
 				title:       "",
 				description: "description",
 				dueDate:     dueDate,
@@ -77,11 +108,13 @@ func TestEntity_NewTask(t *testing.T) {
 		{
 			name: "Fail: description is empty",
 			arg: struct {
+				userID      string
 				title       string
 				description string
 				dueDate     time.Time
 				priority    int
 			}{
+				userID:      userID,
 				title:       "title",
 				description: "",
 				dueDate:     dueDate,
@@ -98,11 +131,13 @@ func TestEntity_NewTask(t *testing.T) {
 		{
 			name: "Fail: priority is less than 1",
 			arg: struct {
+				userID      string
 				title       string
 				description string
 				dueDate     time.Time
 				priority    int
 			}{
+				userID:      userID,
 				title:       "title",
 				description: "description",
 				dueDate:     dueDate,
@@ -119,11 +154,13 @@ func TestEntity_NewTask(t *testing.T) {
 		{
 			name: "Fail: priority is greater than 5",
 			arg: struct {
+				userID      string
 				title       string
 				description string
 				dueDate     time.Time
 				priority    int
 			}{
+				userID:      userID,
 				title:       "title",
 				description: "description",
 				dueDate:     dueDate,
@@ -144,7 +181,7 @@ func TestEntity_NewTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			task, err := NewTask(tt.arg.title, tt.arg.description, tt.arg.dueDate, tt.arg.priority)
+			task, err := NewTask(tt.arg.userID, tt.arg.title, tt.arg.description, tt.arg.dueDate, tt.arg.priority)
 
 			if (err != nil) != (tt.want.err != nil) {
 				t.Errorf("NewTask() error = %v, wantErr %v", err, tt.want.err)

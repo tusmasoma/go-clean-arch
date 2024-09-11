@@ -13,6 +13,10 @@ import (
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
 
+// By using userID as a key when saving tasks in Redis, you can efficiently manage tasks associated with each user.
+// For example, by setting a key in the format userID:taskID, you can easily retrieve and manipulate related tasks for each user.
+// This makes task management scalable and simplifies queries on a per-user basis.
+
 type taskRepository struct {
 	client *redis.Client
 }
@@ -41,7 +45,7 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	return tasks, nil
 }
 
-func (tr *taskRepository) List(ctx context.Context) ([]entity.Task, error) {
+func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
 	ids, err := tr.client.Keys(ctx, "*").Result()
 	if err != nil {
 		log.Error("Failed to get keys", log.Ferror(err))
@@ -58,6 +62,9 @@ func (tr *taskRepository) List(ctx context.Context) ([]entity.Task, error) {
 		if err != nil {
 			log.Error("Failed to deserialize task", log.Ferror(err))
 			return nil, err
+		}
+		if task.UserID != userID {
+			continue
 		}
 		tasks = append(tasks, *task)
 		log.Info("Cache hit", log.Fstring("key", id))

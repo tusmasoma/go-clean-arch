@@ -12,6 +12,7 @@ import (
 	"github.com/tusmasoma/go-clean-arch/config"
 	handler "github.com/tusmasoma/go-clean-arch/interfaces/handler/http"
 	middleware "github.com/tusmasoma/go-clean-arch/interfaces/middleware/http"
+	"github.com/tusmasoma/go-clean-arch/repository/auth"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
@@ -35,11 +36,18 @@ func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 		mysql.NewMySQLDB,
 		mysql.NewTransactionRepository,
 		mysql.NewTaskRepository,
+		mysql.NewUserRepository,
+		auth.NewAuthRepository,
 		usecase.NewTaskUseCase,
+		usecase.NewUserUseCase,
 		handler.NewTaskHandler,
+		handler.NewUserHandler,
+		middleware.NewAuthMiddleware,
 		func(
 			serverConfig *config.ServerConfig,
 			taskHandler handler.TaskHandler,
+			userHandler handler.UserHandler,
+			authMiddleware middleware.AuthMiddleware,
 		) *chi.Mux {
 			r := chi.NewRouter()
 			r.Use(cors.Handler(cors.Options{
@@ -54,7 +62,17 @@ func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 			r.Use(middleware.Logging)
 
 			r.Route("/api", func(r chi.Router) {
+				r.Route("/user", func(r chi.Router) {
+					r.Post("/create", userHandler.CreateUser)
+					r.Group(func(r chi.Router) {
+						r.Use(authMiddleware.Authenticate)
+						r.Get("/get", userHandler.GetUser)
+						r.Put("/update", userHandler.UpdateUser)
+					})
+				})
+
 				r.Route("/task", func(r chi.Router) {
+					r.Use(authMiddleware.Authenticate)
 					r.Get("/get", taskHandler.GetTask)
 					r.Get("/list", taskHandler.ListTasks)
 					r.Post("/create", taskHandler.CreateTask)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/google/uuid"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
 )
@@ -23,7 +24,10 @@ func Test_TaskRepository(t *testing.T) {
 	cli.db = "goCleanArcTestDB"
 	repo := NewTaskRepository(&cli)
 
+	userID := uuid.New().String()
+
 	task1, err := entity.NewTask(
+		userID,
 		"First Task",
 		"First Description",
 		time.Now().Add(24*time.Hour),
@@ -31,6 +35,7 @@ func Test_TaskRepository(t *testing.T) {
 	)
 	ValidateErr(t, err, nil)
 	task2, err := entity.NewTask(
+		userID,
 		"Second Task",
 		"Second Description",
 		time.Now().Add(48*time.Hour),
@@ -52,7 +57,7 @@ func Test_TaskRepository(t *testing.T) {
 	}
 
 	// List
-	gottasks, err := repo.List(ctx)
+	gottasks, err := repo.List(ctx, userID)
 	ValidateErr(t, err, nil)
 	if len(gottasks) != 2 {
 		t.Errorf("want: %v, got: %v", 2, len(gottasks))

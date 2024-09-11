@@ -80,18 +80,18 @@ func (mr *MockTaskRepositoryMockRecorder) Get(ctx, id interface{}) *gomock.Call 
 }
 
 // List mocks base method.
-func (m *MockTaskRepository) List(ctx context.Context) ([]entity.Task, error) {
+func (m *MockTaskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", ctx)
+	ret := m.ctrl.Call(m, "List", ctx, userID)
 	ret0, _ := ret[0].([]entity.Task)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // List indicates an expected call of List.
-func (mr *MockTaskRepositoryMockRecorder) List(ctx interface{}) *gomock.Call {
+func (mr *MockTaskRepositoryMockRecorder) List(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTaskRepository)(nil).List), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTaskRepository)(nil).List), ctx, userID)
 }
 
 // Update mocks base method.
