@@ -258,16 +258,12 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 			}
 
 			usecase := NewUserUseCase(ur, tr, ar)
-			updateUser, err := usecase.UpdateUser(tt.arg.ctx, tt.arg.name)
+			err := usecase.UpdateUser(tt.arg.ctx, tt.arg.name)
 
 			if (err != nil) != (tt.wantErr != nil) {
 				t.Errorf("UpdateUser() error = %v, wantErr %v", err, tt.wantErr)
 			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
 				t.Errorf("UpdateUser() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			if tt.wantErr == nil && updateUser == nil {
-				t.Error("Failed to update user")
 			}
 		})
 	}

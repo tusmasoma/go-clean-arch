@@ -13,6 +13,7 @@ import (
 	"github.com/tusmasoma/go-clean-arch/config"
 	handler "github.com/tusmasoma/go-clean-arch/interfaces/handler/gin"
 	middleware "github.com/tusmasoma/go-clean-arch/interfaces/middleware/gin"
+	"github.com/tusmasoma/go-clean-arch/repository/auth"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
@@ -36,11 +37,18 @@ func GinBuildContainer(ctx context.Context) (*dig.Container, error) {
 		mysql.NewMySQLDB,
 		mysql.NewTransactionRepository,
 		mysql.NewTaskRepository,
+		mysql.NewUserRepository,
+		auth.NewAuthRepository,
 		usecase.NewTaskUseCase,
+		usecase.NewUserUseCase,
 		handler.NewTaskHandler,
+		handler.NewUserHandler,
+		middleware.NewAuthMiddleware,
 		func(
 			serverConfig *config.ServerConfig,
 			taskHandler handler.TaskHandler,
+			userHandler handler.UserHandler,
+			authMiddleware middleware.AuthMiddleware,
 		) *gin.Engine {
 			r := gin.Default()
 
@@ -57,8 +65,22 @@ func GinBuildContainer(ctx context.Context) (*dig.Container, error) {
 
 			api := r.Group("/api")
 			{
+				user := api.Group("/user")
+				{
+					user.POST("/create", userHandler.CreateUser)
+
+					authorized := user.Group("/")
+					authorized.Use(authMiddleware.Authenticate())
+					{
+						authorized.GET("/get", userHandler.GetUser)
+						authorized.PUT("/update", userHandler.UpdateUser)
+					}
+				}
+			}
+			{
 				task := api.Group("/task")
 				{
+					task.Use(authMiddleware.Authenticate())
 					task.GET("/get", taskHandler.GetTask)
 					task.GET("/list", taskHandler.ListTasks)
 					task.POST("/create", taskHandler.CreateTask)

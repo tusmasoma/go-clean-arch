@@ -15,7 +15,7 @@ import (
 type UserUseCase interface {
 	GetUser(ctx context.Context) (*entity.User, error)
 	CreateUserAndToken(ctx context.Context, email string, passward string) (string, error)
-	UpdateUser(ctx context.Context, name string) (*entity.User, error)
+	UpdateUser(ctx context.Context, name string) error
 }
 
 type userUseCase struct {
@@ -84,17 +84,17 @@ func (uuc *userUseCase) CreateUserAndToken(ctx context.Context, email string, pa
 	return jwt, nil
 }
 
-func (uuc *userUseCase) UpdateUser(ctx context.Context, name string) (*entity.User, error) {
+func (uuc *userUseCase) UpdateUser(ctx context.Context, name string) error {
 	userIDValue := ctx.Value(config.ContextUserIDKey)
 	userID, ok := userIDValue.(string)
 	if !ok {
 		log.Error("User ID not found in request context")
-		return nil, errors.New("user name not found in request context")
+		return errors.New("user name not found in request context")
 	}
 	user, err := uuc.ur.Get(ctx, userID)
 	if err != nil {
 		log.Error("Error getting user", log.Fstring("user_id", userID))
-		return nil, err
+		return err
 	}
 
 	// TODO: setter method for user
@@ -104,7 +104,7 @@ func (uuc *userUseCase) UpdateUser(ctx context.Context, name string) (*entity.Us
 
 	if err = uuc.ur.Update(ctx, *user); err != nil {
 		log.Error("Error updating user", log.Fstring("user_id", userID))
-		return nil, err
+		return err
 	}
-	return user, nil
+	return nil
 }
