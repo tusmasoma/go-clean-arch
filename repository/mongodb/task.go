@@ -33,9 +33,11 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	return &task, nil
 }
 
-func (tr *taskRepository) List(ctx context.Context) ([]entity.Task, error) {
+func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
 	collection := tr.client.cli.Database(tr.client.db).Collection(tr.table)
-	filter := bson.M{}
+	filter := bson.M{
+		"user_id": userID,
+	}
 
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {

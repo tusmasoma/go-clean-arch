@@ -35,6 +35,7 @@ func (ur *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	var task entity.Task
 	if err := row.Scan(
 		&task.ID,
+		&task.UserID,
 		&task.Title,
 		&task.Description,
 		&task.DueDate,
@@ -46,7 +47,7 @@ func (ur *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	return &task, nil
 }
 
-func (ur *taskRepository) List(ctx context.Context) ([]entity.Task, error) {
+func (ur *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
 	executor := ur.db
 	if tx := TxFromCtx(ctx); tx != nil {
 		executor = tx
@@ -54,9 +55,10 @@ func (ur *taskRepository) List(ctx context.Context) ([]entity.Task, error) {
 
 	query := `SELECT *
 	FROM Tasks
+	WHERE user_id = ?
 	`
 
-	rows, err := executor.QueryContext(ctx, query)
+	rows, err := executor.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +69,7 @@ func (ur *taskRepository) List(ctx context.Context) ([]entity.Task, error) {
 		var task entity.Task
 		if err = rows.Scan(
 			&task.ID,
+			&task.UserID,
 			&task.Title,
 			&task.Description,
 			&task.DueDate,
@@ -90,15 +93,16 @@ func (ur *taskRepository) Create(ctx context.Context, task entity.Task) error {
 	}
 
 	query := `INSERT INTO Tasks (
-	id, title, description, duedate, priority, created_at
+	id, user_id, title, description, duedate, priority, created_at
 	)
-	VALUES (?, ?, ?, ?, ?, ?)
+	VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
 
 	if _, err := executor.ExecContext(
 		ctx,
 		query,
 		task.ID,
+		task.UserID,
 		task.Title,
 		task.Description,
 		task.DueDate,

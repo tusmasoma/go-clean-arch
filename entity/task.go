@@ -50,6 +50,7 @@ var ValidPriorities = map[int]bool{
 
 type Task struct {
 	ID          string    `json:"id" db:"id" bson:"_id,omitempty"`
+	UserID      string    `json:"user_id" db:"user_id" bson:"user_id"`
 	Title       string    `json:"title" db:"title" bson:"title"`
 	Description string    `json:"description" db:"description" bson:"description"`
 	DueDate     time.Time `json:"due_date" db:"duedate" bson:"duedate"`
@@ -57,7 +58,11 @@ type Task struct {
 	CreatedAt   time.Time `json:"created_at" db:"created_at" bson:"created_at"`
 }
 
-func NewTask(title, description string, dueDate time.Time, priority int) (*Task, error) {
+func NewTask(userID, title, description string, dueDate time.Time, priority int) (*Task, error) {
+	if userID == "" {
+		log.Error("userID is required")
+		return nil, errors.New("userID is required")
+	}
 	if title == "" {
 		log.Error("title is required")
 		return nil, errors.New("title is required")
@@ -73,6 +78,7 @@ func NewTask(title, description string, dueDate time.Time, priority int) (*Task,
 	}
 	return &Task{
 		ID:          uuid.New().String(),
+		UserID:      userID,
 		Title:       title,
 		Description: description,
 		DueDate:     dueDate,

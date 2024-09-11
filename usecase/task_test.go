@@ -10,6 +10,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 
+	"github.com/tusmasoma/go-tech-dojo/config"
+
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/repository/mock"
 )
@@ -17,11 +19,15 @@ import (
 func TestUseCase_GetTask(t *testing.T) {
 	t.Parallel()
 
+	userID := uuid.New().String()
+	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
+
 	taskID := uuid.New().String()
 	dueDate := time.Now().AddDate(0, 0, 1)
 
 	task := &entity.Task{
 		ID:          taskID,
+		UserID:      userID,
 		Title:       "title",
 		Description: "description",
 		DueDate:     dueDate,
@@ -52,7 +58,7 @@ func TestUseCase_GetTask(t *testing.T) {
 				ctx context.Context
 				id  string
 			}{
-				ctx: context.Background(),
+				ctx: ctx,
 				id:  taskID,
 			},
 			want: struct {
@@ -61,6 +67,29 @@ func TestUseCase_GetTask(t *testing.T) {
 			}{
 				task: task,
 				err:  nil,
+			},
+		},
+		{
+			name: "Fail: Task does not belong to the user",
+			setup: func(tr *mock.MockTaskRepository) {
+				tr.EXPECT().Get(gomock.Any(), taskID).Return(&entity.Task{
+					ID:     taskID,
+					UserID: uuid.New().String(),
+				}, nil)
+			},
+			arg: struct {
+				ctx context.Context
+				id  string
+			}{
+				ctx: ctx,
+				id:  taskID,
+			},
+			want: struct {
+				task *entity.Task
+				err  error
+			}{
+				task: nil,
+				err:  errors.New("task does not belong to the user"),
 			},
 		},
 	}
@@ -97,11 +126,14 @@ func TestUseCase_GetTask(t *testing.T) {
 func TestUseCase_ListTasks(t *testing.T) {
 	t.Parallel()
 
+	userID := uuid.New().String()
+	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
 	dueDate := time.Now().AddDate(0, 0, 1)
 
 	tasks := []entity.Task{
 		{
 			ID:          uuid.New().String(),
+			UserID:      userID,
 			Title:       "title",
 			Description: "description",
 			DueDate:     dueDate,
@@ -126,12 +158,15 @@ func TestUseCase_ListTasks(t *testing.T) {
 		{
 			name: "success",
 			setup: func(tr *mock.MockTaskRepository) {
-				tr.EXPECT().List(gomock.Any()).Return(tasks, nil)
+				tr.EXPECT().List(
+					gomock.Any(),
+					userID,
+				).Return(tasks, nil)
 			},
 			arg: struct {
 				ctx context.Context
 			}{
-				ctx: context.Background(),
+				ctx: ctx,
 			},
 			want: struct {
 				tasks []entity.Task
@@ -172,9 +207,11 @@ func TestUseCase_ListTasks(t *testing.T) {
 	}
 }
 
-func TestUseCase_CreateTask(t *testing.T) {
+func TestUseCase_CreateTask(t *testing.T) { //nolint: gocognit // The complexity is caused by the test patterns
 	t.Parallel()
 
+	userID := uuid.New().String()
+	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
 	dueDate := time.Now().AddDate(0, 0, 1)
 
 	patterns := []struct {
@@ -195,6 +232,9 @@ func TestUseCase_CreateTask(t *testing.T) {
 					gomock.Any(),
 					gomock.Any(),
 				).Do(func(_ context.Context, task entity.Task) {
+					if task.UserID != userID {
+						t.Errorf("unexpected UserID: got %v, want %v", task.UserID, userID)
+					}
 					if task.Title != "title" {
 						t.Errorf("unexpected Title: got %v, want %v", task.Title, "title")
 					}
@@ -213,7 +253,7 @@ func TestUseCase_CreateTask(t *testing.T) {
 				ctx    context.Context
 				params *CreateTaskParams
 			}{
-				ctx: context.Background(),
+				ctx: ctx,
 				params: &CreateTaskParams{
 					Title:       "title",
 					Description: "description",
@@ -248,14 +288,17 @@ func TestUseCase_CreateTask(t *testing.T) {
 	}
 }
 
-func TestUseCase_UpdateTask(t *testing.T) {
+func TestUseCase_UpdateTask(t *testing.T) { //nolint: gocognit // The complexity is caused by the test patterns
 	t.Parallel()
 
+	userID := uuid.New().String()
+	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
 	taskID := uuid.New().String()
 	dueDate := time.Now().AddDate(0, 0, 1)
 
 	task := &entity.Task{
 		ID:          taskID,
+		UserID:      userID,
 		Title:       "title",
 		Description: "description",
 		DueDate:     dueDate,
@@ -285,6 +328,9 @@ func TestUseCase_UpdateTask(t *testing.T) {
 					gomock.Any(),
 					gomock.Any(),
 				).Do(func(_ context.Context, task entity.Task) {
+					if task.UserID != userID {
+						t.Errorf("unexpected UserID: got %v, want %v", task.UserID, userID)
+					}
 					if task.Title != "updated title" {
 						t.Errorf("unexpected Title: got %v, want %v", task.Title, "updated title")
 					}
@@ -303,7 +349,7 @@ func TestUseCase_UpdateTask(t *testing.T) {
 				ctx    context.Context
 				params *UpdateTaskParams
 			}{
-				ctx: context.Background(),
+				ctx: ctx,
 				params: &UpdateTaskParams{
 					ID:          taskID,
 					Title:       "updated title",
@@ -313,6 +359,32 @@ func TestUseCase_UpdateTask(t *testing.T) {
 				},
 			},
 			wantErr: nil,
+		},
+		{
+			name: "Fail: Task does not belong to the user",
+			setup: func(tr *mock.MockTaskRepository) {
+				tr.EXPECT().Get(
+					gomock.Any(),
+					taskID,
+				).Return(&entity.Task{
+					ID:     taskID,
+					UserID: uuid.New().String(),
+				}, nil)
+			},
+			arg: struct {
+				ctx    context.Context
+				params *UpdateTaskParams
+			}{
+				ctx: ctx,
+				params: &UpdateTaskParams{
+					ID:          taskID,
+					Title:       "updated title",
+					Description: "updated description",
+					DueDate:     dueDate,
+					Priority:    2,
+				},
+			},
+			wantErr: errors.New("task does not belong to the user"),
 		},
 	}
 
@@ -332,8 +404,10 @@ func TestUseCase_UpdateTask(t *testing.T) {
 
 			err := tuc.UpdateTask(tt.arg.ctx, tt.arg.params)
 
-			if !errors.Is(err, tt.wantErr) {
-				t.Errorf("want: %v, got: %v", tt.wantErr, err)
+			if (err != nil) != (tt.wantErr != nil) {
+				t.Errorf("UpdateTask() error = %v, wantErr %v", err, tt.wantErr)
+			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
+				t.Errorf("UpdateTask() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -342,6 +416,8 @@ func TestUseCase_UpdateTask(t *testing.T) {
 func TestUsaCase_DeleteTask(t *testing.T) {
 	t.Parallel()
 
+	userID := uuid.New().String()
+	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
 	taskID := uuid.New().String()
 
 	patterns := []struct {
@@ -358,16 +434,43 @@ func TestUsaCase_DeleteTask(t *testing.T) {
 		{
 			name: "success",
 			setup: func(tr *mock.MockTaskRepository) {
+				tr.EXPECT().Get(
+					gomock.Any(),
+					taskID,
+				).Return(&entity.Task{
+					ID:     taskID,
+					UserID: userID,
+				}, nil)
 				tr.EXPECT().Delete(gomock.Any(), taskID).Return(nil)
 			},
 			arg: struct {
 				ctx context.Context
 				id  string
 			}{
-				ctx: context.Background(),
+				ctx: ctx,
 				id:  taskID,
 			},
 			wantErr: nil,
+		},
+		{
+			name: "Fail: Task does not belong to the user",
+			setup: func(tr *mock.MockTaskRepository) {
+				tr.EXPECT().Get(
+					gomock.Any(),
+					taskID,
+				).Return(&entity.Task{
+					ID:     taskID,
+					UserID: uuid.New().String(),
+				}, nil)
+			},
+			arg: struct {
+				ctx context.Context
+				id  string
+			}{
+				ctx: ctx,
+				id:  taskID,
+			},
+			wantErr: errors.New("task does not belong to the user"),
 		},
 	}
 
@@ -387,8 +490,10 @@ func TestUsaCase_DeleteTask(t *testing.T) {
 
 			err := tuc.DeleteTask(tt.arg.ctx, tt.arg.id)
 
-			if !errors.Is(err, tt.wantErr) {
-				t.Errorf("want: %v, got: %v", tt.wantErr, err)
+			if (err != nil) != (tt.wantErr != nil) {
+				t.Errorf("DeleteTask() error = %v, wantErr %v", err, tt.wantErr)
+			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
+				t.Errorf("DeleteTask() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
