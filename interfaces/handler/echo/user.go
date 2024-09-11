@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tusmasoma/go-clean-arch/usecase"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	"github.com/tusmasoma/go-clean-arch/usecase"
 )
 
 type UserHandler interface {

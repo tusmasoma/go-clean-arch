@@ -9,8 +9,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/tusmasoma/go-clean-arch/repository/mock"
 	"github.com/tusmasoma/go-tech-dojo/config"
+
+	"github.com/tusmasoma/go-clean-arch/repository/mock"
 )
 
 func dummyTestHandler(c echo.Context) error {

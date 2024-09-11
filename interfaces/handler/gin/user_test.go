@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/usecase/mock"
 )

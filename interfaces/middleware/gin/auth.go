@@ -8,9 +8,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tusmasoma/go-clean-arch/repository"
 	"github.com/tusmasoma/go-tech-dojo/config"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	"github.com/tusmasoma/go-clean-arch/repository"
 )
 
 var ErrCacheMiss = errors.New("cache: key not found")
