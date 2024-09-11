@@ -9,7 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
-	"github.com/tusmasoma/go-tech-dojo/config"
+
+	"github.com/tusmasoma/go-clean-arch/config"
 
 	"github.com/tusmasoma/go-clean-arch/repository/mock"
 )

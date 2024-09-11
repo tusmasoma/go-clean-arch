@@ -9,6 +9,10 @@ import (
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
+type ContextKey string
+
+const ContextUserIDKey ContextKey = "userID"
+
 const (
 	mongoDBPrefix = "MONGO_DB_"
 	serverPrefix  = "SERVER_"

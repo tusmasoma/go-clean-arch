@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/tusmasoma/go-tech-dojo/config"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
@@ -31,7 +30,7 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	val, err := tr.client.Get(ctx, id).Result()
 	if errors.Is(err, redis.Nil) {
 		log.Warn("Cache miss", log.Fstring("key", id))
-		return nil, config.ErrCacheMiss
+		return nil, errors.New("cache: key not found")
 	} else if err != nil {
 		log.Error("Failed to get cache", log.Ferror(err))
 		return nil, err

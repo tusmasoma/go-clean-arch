@@ -6,8 +6,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/tusmasoma/go-tech-dojo/config"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	"github.com/tusmasoma/go-clean-arch/config"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/repository"

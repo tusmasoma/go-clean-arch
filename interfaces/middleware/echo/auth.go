@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tusmasoma/go-tech-dojo/config"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	"github.com/tusmasoma/go-clean-arch/config"
 
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
