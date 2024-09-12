@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
@@ -125,7 +126,7 @@ func base64UrlDecode(s string) ([]byte, error) {
 }
 
 // アクセストークン(JWT形式)の生成
-func (ar *authRepository) GenerateToken(userID, email string) (string, string) {
+func (ar *authRepository) GenerateToken(_ context.Context, userID, email string) (jwt string, jti string) { //nolint: nonamedreturns // this is a common pattern for returning multiple values
 	// ヘッダの作成
 	header := map[string]string{
 		"typ": "JWT",
@@ -135,7 +136,7 @@ func (ar *authRepository) GenerateToken(userID, email string) (string, string) {
 	encodedHeader := base64UrlEncode(headerBytes)
 
 	// ペイロードの作成
-	jti := uuid.New().String()
+	jti = uuid.New().String()
 	payload := map[string]string{
 		"jti":    jti,
 		"userId": userID,
@@ -162,16 +163,17 @@ func (ar *authRepository) GenerateToken(userID, email string) (string, string) {
 	encodedSignature := base64UrlEncode(signature)
 
 	// JWTを完成
-	jwt := fmt.Sprintf("%s.%s", jwtWithoutSignature, encodedSignature)
+	jwt = fmt.Sprintf("%s.%s", jwtWithoutSignature, encodedSignature)
 
 	return jwt, jti
 }
 
-func (ar *authRepository) ValidateAccessToken(jwt string) error {
+func (ar *authRepository) ValidateAccessToken(_ context.Context, jwt string) (map[string]string, error) {
+	var emptyPayload map[string]string
 	// アクセストークンの検証
 	parts := strings.Split(jwt, ".")
 	if len(parts) != expectedTokenParts {
-		return fmt.Errorf("invalid token")
+		return emptyPayload, fmt.Errorf("invalid token")
 	}
 	// エンコードされたヘッダとペイロードを結合
 	jwtWithoutSignature := fmt.Sprintf("%s.%s", parts[0], parts[1])
@@ -181,32 +183,21 @@ func (ar *authRepository) ValidateAccessToken(jwt string) error {
 	// 著名作成
 	signature, err := base64UrlDecode(parts[2])
 	if err != nil {
-		return fmt.Errorf("decoding failed: %w", err)
+		return emptyPayload, fmt.Errorf("decoding failed: %w", err)
 	}
 
 	// 検証
 	pubKey, err := loadPublicKey(rawPublicKey)
 	if err != nil {
-		return err
+		return emptyPayload, err
 	}
 
 	err = rsa.VerifyPKCS1v15(pubKey, crypto.SHA256, hashed[:], signature)
 	log.Print(err)
 	if err != nil {
-		return fmt.Errorf("signature verification failed: %w", err)
+		return emptyPayload, fmt.Errorf("signature verification failed: %w", err)
 	}
 
-	return nil
-}
-
-func (ar *authRepository) GetPayloadFromToken(jwt string) (map[string]string, error) {
-	var emptyPayload map[string]string
-	// アクセストークンの検証
-	parts := strings.Split(jwt, ".")
-	if len(parts) != expectedTokenParts {
-		return emptyPayload, fmt.Errorf("invalid token")
-	}
-	// エンコードされたヘッダとペイロードを結合
 	encodedPayload := parts[1]
 	// Base64Urlデコード
 	payloadBytes, err := base64UrlDecode(encodedPayload)

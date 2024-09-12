@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -9,13 +10,14 @@ import (
 )
 
 func Test_JWTToken(t *testing.T) {
+	ctx := context.Background()
 	userID := uuid.MustParse("f6db2530-cd9b-4ac1-8dc1-38c795e6eec2")
 	email := "test@gmail.com"
 
 	repo := NewAuthRepository()
 
 	// GenerateToken test
-	jwt, jti := repo.GenerateToken(userID.String(), email)
+	jwt, jti := repo.GenerateToken(ctx, userID.String(), email)
 
 	// JWTのフォーマットが正しいことを確認
 	token, err := jwtgo.Parse(jwt, func(token *jwtgo.Token) (interface{}, error) {
@@ -41,16 +43,11 @@ func Test_JWTToken(t *testing.T) {
 	}
 
 	// ValidateAccessToken test
-	err = repo.ValidateAccessToken(jwt)
+	payload, err := repo.ValidateAccessToken(ctx, jwt)
 	if err != nil {
 		t.Errorf("Failed to ValidateAccessToken: %s", err)
 	}
 
-	// GetPayloadFromToken test
-	payload, err := repo.GetPayloadFromToken(jwt)
-	if err != nil {
-		t.Errorf("Failed to GetPayloadFromToken: %s", err)
-	}
 	wantPayload := map[string]string{
 		"jti":    jti,
 		"userId": userID.String(),

@@ -45,12 +45,7 @@ func (am *authMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		jwt := parts[1]
 
-		if err := am.ar.ValidateAccessToken(jwt); err != nil {
-			log.Warn("Authentication failed: invalid access token", log.Ferror(err))
-			return c.JSON(http.StatusUnauthorized, echo.Map{"error": fmt.Sprintf("Authentication failed: %v", err)})
-		}
-
-		payload, err := am.ar.GetPayloadFromToken(jwt)
+		payload, err := am.ar.ValidateAccessToken(ctx, jwt)
 		if err != nil {
 			log.Warn("Authentication failed: invalid access token", log.Ferror(err))
 			return c.JSON(http.StatusUnauthorized, echo.Map{"error": fmt.Sprintf("Authentication failed: %v", err)})

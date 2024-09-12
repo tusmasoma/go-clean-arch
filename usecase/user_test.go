@@ -119,6 +119,7 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 				}).Return(nil)
 				m2.EXPECT().GenerateToken(
 					gomock.Any(),
+					gomock.Any(),
 					"test@gmail.com",
 				).Return("jwt", "jti")
 			},

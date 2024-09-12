@@ -50,13 +50,7 @@ func (am *authMiddleware) Authenticate() gin.HandlerFunc {
 		}
 		jwt := parts[1]
 
-		if err := am.ar.ValidateAccessToken(jwt); err != nil {
-			log.Warn("Authentication failed: invalid access token", log.Ferror(err))
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("Authentication failed: %v", err)})
-			return
-		}
-
-		payload, err := am.ar.GetPayloadFromToken(jwt)
+		payload, err := am.ar.ValidateAccessToken(ctx, jwt)
 		if err != nil {
 			log.Warn("Authentication failed: invalid access token", log.Ferror(err))
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("Authentication failed: %v", err)})

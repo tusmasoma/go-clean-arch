@@ -111,6 +111,51 @@ func Test_NewMongoDB(t *testing.T) {
 	}
 }
 
+func Test_NewFirebaseConfig(t *testing.T) {
+	ctx := context.Background()
+
+	patterns := []struct {
+		name  string
+		setup func(t *testing.T)
+		want  *FirebaseConfig
+		err   error
+	}{
+		{
+			name: "default",
+			setup: func(t *testing.T) {
+				t.Helper()
+			},
+			want: nil,
+			err:  envconfig.ErrMissingRequired,
+		},
+		{
+			name: "set env",
+			setup: func(t *testing.T) {
+				t.Helper()
+				t.Setenv("FIREBASE_API_KEY", "myapikey")
+				t.Setenv("FIREBASE_CREDENTIALS_PATH", "path/to/credentials.json")
+			},
+			want: &FirebaseConfig{
+				APIKey:          "myapikey",
+				CredentialsPath: "path/to/credentials.json",
+			},
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setup(t)
+
+			got, err := NewFirebaseConfig(ctx)
+			if err != nil {
+				require.ErrorIs(t, err, tt.err)
+			}
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func Test_NewCacheConfig(t *testing.T) {
 	ctx := context.Background()
 
