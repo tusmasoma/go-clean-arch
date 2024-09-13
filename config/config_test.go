@@ -66,7 +66,7 @@ func Test_NewMongoDB(t *testing.T) {
 	patterns := []struct {
 		name  string
 		setup func(t *testing.T)
-		want  *MongoDB
+		want  *MongoDBConfig
 		err   error
 	}{
 		{
@@ -87,7 +87,7 @@ func Test_NewMongoDB(t *testing.T) {
 				t.Setenv("MONGO_DB_DATABASE", "database")
 				t.Setenv("MONGO_DB_COLLECTION", "col")
 			},
-			want: &MongoDB{
+			want: &MongoDBConfig{
 				URI:        "mongodb://localhost:27017",
 				Password:   "pass",
 				User:       "root",
@@ -102,7 +102,7 @@ func Test_NewMongoDB(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup(t)
 
-			got, err := NewMongoDB(ctx)
+			got, err := NewMongoDBConfig(ctx)
 			if err != nil {
 				require.ErrorIs(t, err, tt.err)
 			}

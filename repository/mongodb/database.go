@@ -19,7 +19,7 @@ type Client struct {
 }
 
 func NewMongoDB(ctx context.Context) (*Client, error) {
-	cfg, err := config.NewMongoDB(ctx)
+	cfg, err := config.NewMongoDBConfig(ctx)
 	if err != nil {
 		log.Error("Failed to load database config", log.Ferror(err))
 		return nil, err

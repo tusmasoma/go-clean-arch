@@ -26,7 +26,7 @@ type DBConfig struct {
 	DBName   string `env:"DB_NAME, required"`
 }
 
-type MongoDB struct {
+type MongoDBConfig struct {
 	URI        string `env:"URI, required"`
 	Password   string `env:"PASSWORD"`
 	User       string `env:"USER"`
@@ -58,8 +58,8 @@ func NewDBConfig(ctx context.Context, dbPrefix string) (*DBConfig, error) {
 	return conf, nil
 }
 
-func NewMongoDB(ctx context.Context) (*MongoDB, error) {
-	conf := &MongoDB{}
+func NewMongoDBConfig(ctx context.Context) (*MongoDBConfig, error) {
+	conf := &MongoDBConfig{}
 	pl := envconfig.PrefixLookuper(mongoDBPrefix, envconfig.OsLookuper())
 	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
 		log.Error("Failed to load MongoDB config", log.Ferror(err))
