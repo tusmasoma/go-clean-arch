@@ -49,13 +49,17 @@ var ValidPriorities = map[int]bool{
 }
 
 type Task struct {
-	ID          string    `json:"id" db:"id" bson:"_id,omitempty"`
-	UserID      string    `json:"user_id" db:"user_id" bson:"user_id"`
-	Title       string    `json:"title" db:"title" bson:"title"`
-	Description string    `json:"description" db:"description" bson:"description"`
-	DueDate     time.Time `json:"due_date" db:"duedate" bson:"duedate"`
-	Priority    int       `json:"priority" db:"priority" bson:"priority"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at" bson:"created_at"`
+	ID          string    `json:"id"`
+	UserID      string    `json:"user_id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+func (t *Task) IsOverdue() bool {
+	return time.Now().After(t.DueDate)
 }
 
 func NewTask(userID, title, description string, dueDate time.Time, priority int) (*Task, error) {

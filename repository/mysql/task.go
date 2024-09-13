@@ -3,10 +3,21 @@ package mysql
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
+
+type taskModel struct {
+	ID          string    `db:"id"`
+	UserID      string    `db:"user_id"`
+	Title       string    `db:"title"`
+	Description string    `db:"description"`
+	DueDate     time.Time `db:"duedate"`
+	Priority    int       `db:"priority"`
+	CreatedAt   time.Time `db:"created_at"`
+}
 
 type taskRepository struct {
 	db SQLExecutor
@@ -32,19 +43,28 @@ func (ur *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 
 	row := executor.QueryRowContext(ctx, query, id)
 
-	var task entity.Task
+	var tm taskModel
 	if err := row.Scan(
-		&task.ID,
-		&task.UserID,
-		&task.Title,
-		&task.Description,
-		&task.DueDate,
-		&task.Priority,
-		&task.CreatedAt,
+		&tm.ID,
+		&tm.UserID,
+		&tm.Title,
+		&tm.Description,
+		&tm.DueDate,
+		&tm.Priority,
+		&tm.CreatedAt,
 	); err != nil {
 		return nil, err
 	}
-	return &task, nil
+
+	return &entity.Task{
+		ID:          tm.ID,
+		UserID:      tm.UserID,
+		Title:       tm.Title,
+		Description: tm.Description,
+		DueDate:     tm.DueDate,
+		Priority:    tm.Priority,
+		CreatedAt:   tm.CreatedAt,
+	}, nil
 }
 
 func (ur *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
@@ -64,25 +84,39 @@ func (ur *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 	}
 	defer rows.Close()
 
-	var tasks []entity.Task
+	var tms []taskModel
 	for rows.Next() {
-		var task entity.Task
+		var tm taskModel
 		if err = rows.Scan(
-			&task.ID,
-			&task.UserID,
-			&task.Title,
-			&task.Description,
-			&task.DueDate,
-			&task.Priority,
-			&task.CreatedAt,
+			&tm.ID,
+			&tm.UserID,
+			&tm.Title,
+			&tm.Description,
+			&tm.DueDate,
+			&tm.Priority,
+			&tm.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
-		tasks = append(tasks, task)
+		tms = append(tms, tm)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
+	tasks := make([]entity.Task, len(tms))
+	for i, tm := range tms {
+		tasks[i] = entity.Task{
+			ID:          tm.ID,
+			UserID:      tm.UserID,
+			Title:       tm.Title,
+			Description: tm.Description,
+			DueDate:     tm.DueDate,
+			Priority:    tm.Priority,
+			CreatedAt:   tm.CreatedAt,
+		}
+	}
+
 	return tasks, nil
 }
 
@@ -98,16 +132,26 @@ func (ur *taskRepository) Create(ctx context.Context, task entity.Task) error {
 	VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
 
+	tm := taskModel{
+		ID:          task.ID,
+		UserID:      task.UserID,
+		Title:       task.Title,
+		Description: task.Description,
+		DueDate:     task.DueDate,
+		Priority:    task.Priority,
+		CreatedAt:   task.CreatedAt,
+	}
+
 	if _, err := executor.ExecContext(
 		ctx,
 		query,
-		task.ID,
-		task.UserID,
-		task.Title,
-		task.Description,
-		task.DueDate,
-		task.Priority,
-		task.CreatedAt,
+		tm.ID,
+		tm.UserID,
+		tm.Title,
+		tm.Description,
+		tm.DueDate,
+		tm.Priority,
+		tm.CreatedAt,
 	); err != nil {
 		return err
 	}
@@ -125,14 +169,22 @@ func (ur *taskRepository) Update(ctx context.Context, task entity.Task) error {
 	WHERE id = ?
 	`
 
+	tm := taskModel{
+		ID:          task.ID,
+		Title:       task.Title,
+		Description: task.Description,
+		DueDate:     task.DueDate,
+		Priority:    task.Priority,
+	}
+
 	if _, err := executor.ExecContext(
 		ctx,
 		query,
-		task.Title,
-		task.Description,
-		task.DueDate,
-		task.Priority,
-		task.ID,
+		tm.Title,
+		tm.Description,
+		tm.DueDate,
+		tm.Priority,
+		tm.ID,
 	); err != nil {
 		return err
 	}

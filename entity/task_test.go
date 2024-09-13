@@ -195,3 +195,41 @@ func TestEntity_NewTask(t *testing.T) {
 		})
 	}
 }
+
+func TestEntity_Task_IsOverdue(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now()
+
+	patterns := []struct {
+		name string
+		arg  time.Time
+		want bool
+	}{
+		{
+			name: "success",
+			arg:  now.AddDate(0, 0, 1),
+			want: false,
+		},
+		{
+			name: "success",
+			arg:  now.AddDate(0, 0, -1),
+			want: true,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			task := &Task{
+				DueDate: tt.arg,
+			}
+
+			if got := task.IsOverdue(); got != tt.want {
+				t.Errorf("IsOverdue() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

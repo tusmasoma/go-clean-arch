@@ -2,12 +2,23 @@ package mongodb
 
 import (
 	"context"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
+
+type taskModel struct {
+	ID          string    `bson:"_id,omitempty"`
+	UserID      string    `bson:"user_id"`
+	Title       string    `bson:"title"`
+	Description string    `bson:"description"`
+	DueDate     time.Time `bson:"duedate"`
+	Priority    int       `bson:"priority"`
+	CreatedAt   time.Time `bson:"created_at"`
+}
 
 type taskRepository struct {
 	client *Client
@@ -26,11 +37,19 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 
 	collection := tr.client.cli.Database(tr.client.db).Collection(tr.table)
 
-	var task entity.Task
-	if err := collection.FindOne(ctx, filter).Decode(&task); err != nil {
+	var tm taskModel
+	if err := collection.FindOne(ctx, filter).Decode(&tm); err != nil {
 		return nil, err
 	}
-	return &task, nil
+	return &entity.Task{
+		ID:          tm.ID,
+		UserID:      tm.UserID,
+		Title:       tm.Title,
+		Description: tm.Description,
+		DueDate:     tm.DueDate,
+		Priority:    tm.Priority,
+		CreatedAt:   tm.CreatedAt,
+	}, nil
 }
 
 func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
@@ -45,9 +64,22 @@ func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 	}
 	defer cursor.Close(ctx)
 
-	var tasks []entity.Task
-	if err = cursor.All(ctx, &tasks); err != nil {
+	var tms []taskModel
+	if err = cursor.All(ctx, &tms); err != nil {
 		return nil, err
+	}
+
+	tasks := make([]entity.Task, len(tms))
+	for i, tm := range tms {
+		tasks[i] = entity.Task{
+			ID:          tm.ID,
+			UserID:      tm.UserID,
+			Title:       tm.Title,
+			Description: tm.Description,
+			DueDate:     tm.DueDate,
+			Priority:    tm.Priority,
+			CreatedAt:   tm.CreatedAt,
+		}
 	}
 	return tasks, nil
 }
@@ -55,7 +87,17 @@ func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 func (tr *taskRepository) Create(ctx context.Context, task entity.Task) error {
 	collection := tr.client.cli.Database(tr.client.db).Collection(tr.table)
 
-	if _, err := collection.InsertOne(ctx, task); err != nil {
+	tm := taskModel{
+		ID:          task.ID,
+		UserID:      task.UserID,
+		Title:       task.Title,
+		Description: task.Description,
+		DueDate:     task.DueDate,
+		Priority:    task.Priority,
+		CreatedAt:   task.CreatedAt,
+	}
+
+	if _, err := collection.InsertOne(ctx, tm); err != nil {
 		return err
 	}
 	return nil
