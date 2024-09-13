@@ -2,15 +2,71 @@ package gorm
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 
 	"github.com/tusmasoma/go-clean-arch/config"
+	"github.com/tusmasoma/go-clean-arch/repository"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
+
+type transactionRepository struct {
+	db *gorm.DB
+}
+
+func NewTransactionRepository(db *gorm.DB) repository.TransactionRepository {
+	return &transactionRepository{
+		db: db,
+	}
+}
+
+func (tr *transactionRepository) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	tx := tr.db.WithContext(ctx).Begin(&sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	ctx = context.WithValue(ctx, CtxTxKey(), tx)
+
+	var done bool
+	defer func() {
+		ctx = context.WithValue(ctx, CtxTxKey(), nil)
+		if !done {
+			if rollbackErr := tx.Rollback(); rollbackErr.Error != nil {
+				log.Error("Failed to rollback transaction", log.Ferror(rollbackErr.Error))
+			}
+		}
+	}()
+
+	if err := fn(ctx); err != nil {
+		return err
+	}
+
+	done = true
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type TxKey string
+
+func CtxTxKey() TxKey {
+	return "tx"
+}
+
+func TxFromCtx(ctx context.Context) *gorm.DB {
+	tx, ok := ctx.Value(CtxTxKey()).(*gorm.DB)
+	if !ok {
+		return nil
+	}
+	return tx
+}
 
 const (
 	dbPrefix = "MYSQL_"

@@ -31,8 +31,13 @@ func NewTaskRepository(db *gorm.DB) repository.TaskRepository {
 }
 
 func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, error) {
+	executor := tr.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
 	var tm taskModel
-	if err := tr.db.WithContext(ctx).First(&tm, "id = ?", id).Error; err != nil {
+	if err := executor.WithContext(ctx).First(&tm, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 
@@ -48,8 +53,13 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 }
 
 func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
+	executor := tr.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
 	var tms []taskModel
-	if err := tr.db.WithContext(ctx).Find(&tms, "user_id = ?", userID).Error; err != nil {
+	if err := executor.WithContext(ctx).Find(&tms, "user_id = ?", userID).Error; err != nil {
 		return nil, err
 	}
 
@@ -69,7 +79,12 @@ func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 }
 
 func (tr *taskRepository) Create(ctx context.Context, task entity.Task) error {
-	if err := tr.db.WithContext(ctx).Create(&taskModel{
+	executor := tr.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
+	if err := executor.WithContext(ctx).Create(&taskModel{
 		ID:          task.ID,
 		UserID:      task.UserID,
 		Title:       task.Title,
@@ -84,7 +99,12 @@ func (tr *taskRepository) Create(ctx context.Context, task entity.Task) error {
 }
 
 func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
-	if err := tr.db.WithContext(ctx).Save(&taskModel{
+	executor := tr.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
+	if err := executor.WithContext(ctx).Save(&taskModel{
 		ID:          task.ID,
 		UserID:      task.UserID,
 		Title:       task.Title,
@@ -99,7 +119,12 @@ func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
 }
 
 func (tr *taskRepository) Delete(ctx context.Context, id string) error {
-	if err := tr.db.WithContext(ctx).Delete(&taskModel{}, "id = ?", id).Error; err != nil {
+	executor := tr.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
+	if err := executor.WithContext(ctx).Delete(&taskModel{}, "id = ?", id).Error; err != nil {
 		return err
 	}
 	return nil

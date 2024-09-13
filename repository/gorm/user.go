@@ -29,8 +29,13 @@ func NewUserRepository(db *gorm.DB) repository.UserRepository {
 }
 
 func (ur *userRepository) Get(ctx context.Context, id string) (*entity.User, error) {
+	executor := ur.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
 	var um userModel
-	if err := ur.db.WithContext(ctx).First(&um, "id = ?", id).Error; err != nil {
+	if err := executor.WithContext(ctx).First(&um, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 
@@ -43,7 +48,12 @@ func (ur *userRepository) Get(ctx context.Context, id string) (*entity.User, err
 }
 
 func (ur *userRepository) Create(ctx context.Context, user entity.User) error {
-	if err := ur.db.WithContext(ctx).Create(&userModel{
+	executor := ur.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
+	if err := executor.WithContext(ctx).Create(&userModel{
 		ID:       user.ID,
 		Name:     user.Name,
 		Email:    user.Email,
@@ -55,7 +65,12 @@ func (ur *userRepository) Create(ctx context.Context, user entity.User) error {
 }
 
 func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
-	if err := ur.db.WithContext(ctx).Save(&userModel{
+	executor := ur.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
+	if err := executor.WithContext(ctx).Save(&userModel{
 		ID:       user.ID,
 		Name:     user.Name,
 		Email:    user.Email,
@@ -67,14 +82,24 @@ func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
 }
 
 func (ur *userRepository) Delete(ctx context.Context, id string) error {
-	if err := ur.db.WithContext(ctx).Delete(&userModel{}, "id = ?", id).Error; err != nil {
+	executor := ur.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
+	if err := executor.WithContext(ctx).Delete(&userModel{}, "id = ?", id).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (ur *userRepository) LockUserByEmail(ctx context.Context, email string) (bool, error) {
-	if err := ur.db.WithContext(ctx).Set("gorm:query_option", "FOR UPDATE").Where("email = ?", email).First(&userModel{}).Error; err != nil {
+	executor := ur.db
+	if tx := TxFromCtx(ctx); tx != nil {
+		executor = tx
+	}
+
+	if err := executor.WithContext(ctx).Set("gorm:query_option", "FOR UPDATE").Where("email = ?", email).First(&userModel{}).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Println("No user found with the provided email", email)
 			return false, nil
