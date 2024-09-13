@@ -15,7 +15,7 @@ import (
 func Test_TaskRepository(t *testing.T) {
 	ctx := context.Background()
 
-	if err := db.AutoMigrate(&entity.Task{}); err != nil { // migrate
+	if err := db.AutoMigrate(&taskModel{}); err != nil { // migrate
 		t.Fatal(err)
 	}
 

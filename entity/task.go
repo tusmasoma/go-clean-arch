@@ -49,13 +49,13 @@ var ValidPriorities = map[int]bool{
 }
 
 type Task struct {
-	ID          string    `json:"id" db:"id" bson:"_id,omitempty" gorm:"type:char(36);primaryKey"`
-	UserID      string    `json:"user_id" db:"user_id" bson:"user_id" gorm:"column:user_id"`
-	Title       string    `json:"title" db:"title" bson:"title" gorm:"column:title"`
-	Description string    `json:"description" db:"description" bson:"description" gorm:"column:description"`
-	DueDate     time.Time `json:"due_date" db:"duedate" bson:"duedate" gorm:"column:duedate"`
-	Priority    int       `json:"priority" db:"priority" bson:"priority" gorm:"column:priority"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at" bson:"created_at" gorm:"column:created_at"`
+	ID          string    `json:"id" db:"id" bson:"_id,omitempty"`
+	UserID      string    `json:"user_id" db:"user_id" bson:"user_id"`
+	Title       string    `json:"title" db:"title" bson:"title"`
+	Description string    `json:"description" db:"description" bson:"description"`
+	DueDate     time.Time `json:"due_date" db:"duedate" bson:"duedate"`
+	Priority    int       `json:"priority" db:"priority" bson:"priority"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at" bson:"created_at"`
 }
 
 func NewTask(userID, title, description string, dueDate time.Time, priority int) (*Task, error) {

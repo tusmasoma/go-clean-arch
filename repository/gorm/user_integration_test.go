@@ -11,7 +11,7 @@ import (
 func Test_UserRepository(t *testing.T) {
 	ctx := context.Background()
 
-	if err := db.AutoMigrate(&entity.User{}); err != nil { // migrate
+	if err := db.AutoMigrate(&userModel{}); err != nil { // migrate
 		t.Fatal(err)
 	}
 
