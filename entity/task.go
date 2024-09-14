@@ -49,13 +49,33 @@ var ValidPriorities = map[int]bool{
 }
 
 type Task struct {
-	ID          string    `json:"id" db:"id" bson:"_id,omitempty"`
-	UserID      string    `json:"user_id" db:"user_id" bson:"user_id"`
-	Title       string    `json:"title" db:"title" bson:"title"`
-	Description string    `json:"description" db:"description" bson:"description"`
-	DueDate     time.Time `json:"due_date" db:"duedate" bson:"duedate"`
-	Priority    int       `json:"priority" db:"priority" bson:"priority"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at" bson:"created_at"`
+	ID          string    `json:"id"`
+	UserID      string    `json:"user_id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+	CreatedAt   time.Time `json:"created_at"`
+	IsOverdue   bool      `json:"is_overdue"`
+	IsDueSoon   bool      `json:"is_due_soon"`
+}
+
+func (t *Task) CheckOverdue() bool {
+	return time.Now().After(t.DueDate)
+}
+
+func (t *Task) CheckDueSoon() bool {
+	now := time.Now()
+	return now.Before(t.DueDate) && time.Now().After(t.DueDate.AddDate(0, 0, -1))
+}
+
+func (t *Task) SetPriority(priority int) error {
+	if !ValidPriorities[priority] {
+		log.Error("priority must be between 1 and 5")
+		return errors.New("priority must be between 1 and 5")
+	}
+	t.Priority = priority
+	return nil
 }
 
 func NewTask(userID, title, description string, dueDate time.Time, priority int) (*Task, error) {

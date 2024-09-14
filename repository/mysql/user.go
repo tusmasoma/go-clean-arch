@@ -11,6 +11,13 @@ import (
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
 
+type userModel struct {
+	ID       string `db:"id"`
+	Name     string `db:"name"`
+	Email    string `db:"email"`
+	Password string `db:"password"`
+}
+
 type userRepository struct {
 	db SQLExecutor
 }
@@ -34,16 +41,21 @@ func (ur *userRepository) Get(ctx context.Context, id string) (*entity.User, err
 
 	row := executor.QueryRowContext(ctx, query, id)
 
-	var user entity.User
+	var um userModel
 	if err := row.Scan(
-		&user.ID,
-		&user.Name,
-		&user.Email,
-		&user.Password,
+		&um.ID,
+		&um.Name,
+		&um.Email,
+		&um.Password,
 	); err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &entity.User{
+		ID:       um.ID,
+		Name:     um.Name,
+		Email:    um.Email,
+		Password: um.Password,
+	}, nil
 }
 
 func (ur *userRepository) Create(ctx context.Context, user entity.User) error {
@@ -58,13 +70,20 @@ func (ur *userRepository) Create(ctx context.Context, user entity.User) error {
 	VALUES (?, ?, ?, ?)
 	`
 
+	um := userModel{
+		ID:       user.ID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+	}
+
 	if _, err := executor.ExecContext(
 		ctx,
 		query,
-		user.ID,
-		user.Name,
-		user.Email,
-		user.Password,
+		um.ID,
+		um.Name,
+		um.Email,
+		um.Password,
 	); err != nil {
 		return err
 	}
@@ -82,13 +101,20 @@ func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
 	WHERE id = ?
 	`
 
+	um := userModel{
+		ID:       user.ID,
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+	}
+
 	if _, err := executor.ExecContext(
 		ctx,
 		query,
-		user.Name,
-		user.Email,
-		user.Password,
-		user.ID,
+		um.Name,
+		um.Email,
+		um.Password,
+		um.ID,
 	); err != nil {
 		return err
 	}

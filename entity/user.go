@@ -9,10 +9,10 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id" db:"id" bson:"_id,omitempty"`
-	Name     string `json:"name" db:"name" bson:"name"`
-	Email    string `json:"email" db:"email" bson:"email"`
-	Password string `json:"password" db:"password" bson:"password"`
+	ID       string `json:"id" bson:"_id,omitempty"`
+	Name     string `json:"name" bson:"name"`
+	Email    string `json:"email" bson:"email"`
+	Password string `json:"password" bson:"password"`
 }
 
 func NewUser(email, password string) (*User, error) {
