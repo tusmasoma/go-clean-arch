@@ -196,7 +196,7 @@ func TestEntity_NewTask(t *testing.T) {
 	}
 }
 
-func TestEntity_Task_IsOverdue(t *testing.T) {
+func TestEntity_Task_CheckOverdue(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
@@ -207,12 +207,12 @@ func TestEntity_Task_IsOverdue(t *testing.T) {
 		want bool
 	}{
 		{
-			name: "success",
+			name: "Success: Not overdue, due tomorrow",
 			arg:  now.AddDate(0, 0, 1),
 			want: false,
 		},
 		{
-			name: "success",
+			name: "Success: Already overdue",
 			arg:  now.AddDate(0, 0, -1),
 			want: true,
 		},
@@ -227,8 +227,119 @@ func TestEntity_Task_IsOverdue(t *testing.T) {
 				DueDate: tt.arg,
 			}
 
-			if got := task.IsOverdue(); got != tt.want {
+			if got := task.CheckOverdue(); got != tt.want {
 				t.Errorf("IsOverdue() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEntity_Task_CheckDueSoon(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now()
+
+	patterns := []struct {
+		name string
+		arg  time.Time
+		want bool
+	}{
+		{
+			name: "Success: Due soon within 1 day",
+			arg:  now.AddDate(0, 0, 1),
+			want: true,
+		},
+		{
+			name: "Success: Not due soon, 2 days left",
+			arg:  now.AddDate(0, 0, 2),
+			want: false,
+		},
+		{
+			name: "Success: Already overdue",
+			arg:  now.AddDate(0, 0, -1),
+			want: false,
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			task := &Task{
+				DueDate: tt.arg,
+			}
+
+			if got := task.CheckDueSoon(); got != tt.want {
+				t.Errorf("CheckDueSoon() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEntity_Task_SetPriority(t *testing.T) {
+	t.Parallel()
+
+	patterns := []struct {
+		name string
+		arg  int
+		want struct {
+			priority int
+			err      error
+		}
+	}{
+		{
+			name: "success",
+			arg:  Medium,
+			want: struct {
+				priority int
+				err      error
+			}{
+				priority: Medium,
+				err:      nil,
+			},
+		},
+		{
+			name: "Fail: priority is less than 1",
+			arg:  0,
+			want: struct {
+				priority int
+				err      error
+			}{
+				priority: 0,
+				err:      errors.New("priority must be between 1 and 5"),
+			},
+		},
+		{
+			name: "Fail: priority is greater than 5",
+			arg:  6,
+			want: struct {
+				priority int
+				err      error
+			}{
+				priority: 6,
+				err:      errors.New("priority must be between 1 and 5"),
+			},
+		},
+	}
+
+	for _, tt := range patterns {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			task := &Task{}
+
+			err := task.SetPriority(tt.arg)
+
+			if (err != nil) != (tt.want.err != nil) {
+				t.Errorf("SetPriority() error = %v, wantErr %v", err, tt.want.err)
+			} else if err != nil && tt.want.err != nil && err.Error() != tt.want.err.Error() {
+				t.Errorf("SetPriority() error = %v, wantErr %v", err, tt.want.err)
+			}
+
+			if tt.want.err == nil && task.Priority != tt.want.priority {
+				t.Errorf("SetPriority() priority = %v, want %v", task.Priority, tt.want.priority)
 			}
 		})
 	}

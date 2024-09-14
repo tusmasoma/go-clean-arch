@@ -56,10 +56,26 @@ type Task struct {
 	DueDate     time.Time `json:"due_date"`
 	Priority    int       `json:"priority"`
 	CreatedAt   time.Time `json:"created_at"`
+	IsOverdue   bool      `json:"is_overdue"`
+	IsDueSoon   bool      `json:"is_due_soon"`
 }
 
-func (t *Task) IsOverdue() bool {
+func (t *Task) CheckOverdue() bool {
 	return time.Now().After(t.DueDate)
+}
+
+func (t *Task) CheckDueSoon() bool {
+	now := time.Now()
+	return now.Before(t.DueDate) && time.Now().After(t.DueDate.AddDate(0, 0, -1))
+}
+
+func (t *Task) SetPriority(priority int) error {
+	if !ValidPriorities[priority] {
+		log.Error("priority must be between 1 and 5")
+		return errors.New("priority must be between 1 and 5")
+	}
+	t.Priority = priority
+	return nil
 }
 
 func NewTask(userID, title, description string, dueDate time.Time, priority int) (*Task, error) {

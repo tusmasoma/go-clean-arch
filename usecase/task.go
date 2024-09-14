@@ -126,7 +126,10 @@ func (tuc *taskUseCase) UpdateTask(ctx context.Context, params *UpdateTaskParams
 	task.Title = params.Title
 	task.Description = params.Description
 	task.DueDate = params.DueDate
-	task.Priority = params.Priority
+	if err = task.SetPriority(params.Priority); err != nil {
+		log.Error("Failed to set priority", log.Ferror(err))
+		return err
+	}
 
 	if err = tuc.tr.Update(ctx, *task); err != nil {
 		log.Error("Failed to update task", log.Ferror(err))
