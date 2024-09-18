@@ -104,7 +104,7 @@ func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
 		executor = tx
 	}
 
-	if err := executor.WithContext(ctx).Save(&taskModel{
+	if err := executor.WithContext(ctx).Model(&taskModel{}).Where("id = ?", task.ID).Updates(&taskModel{
 		ID:          task.ID,
 		UserID:      task.UserID,
 		Title:       task.Title,
@@ -115,6 +115,7 @@ func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
 	}).Error; err != nil {
 		return err
 	}
+
 	return nil
 }
 
