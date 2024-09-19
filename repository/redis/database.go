@@ -24,10 +24,10 @@ func NewRedisClient(ctx context.Context) *redis.Client {
 
 	_, err = client.Ping(ctx).Result()
 	if err != nil {
-		log.Critical("Failed to connect to Redis", log.Ferror(err), log.Fstring("addr", conf.Addr))
+		log.Critical("Failed to connect to Redis", log.Ferror(err))
 		return nil
 	}
 
-	log.Info("Successfully connected to Redis", log.Fstring("addr", conf.Addr))
+	log.Info("Successfully connected to Redis")
 	return client
 }
