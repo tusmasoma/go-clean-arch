@@ -25,6 +25,8 @@ func NewTransactionRepository(db *gorm.DB) repository.TransactionRepository {
 }
 
 func (tr *transactionRepository) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
+	var err error
+
 	tx := tr.db.WithContext(ctx).Begin(&sql.TxOptions{Isolation: sql.LevelRepeatableRead})
 	if tx.Error != nil {
 		return tx.Error
@@ -32,22 +34,19 @@ func (tr *transactionRepository) Transaction(ctx context.Context, fn func(ctx co
 
 	ctx = context.WithValue(ctx, CtxTxKey(), tx)
 
-	var done bool
 	defer func() {
-		ctx = context.WithValue(ctx, CtxTxKey(), nil)
-		if !done {
-			if rollbackErr := tx.Rollback(); rollbackErr.Error != nil {
-				log.Error("Failed to rollback transaction", log.Ferror(rollbackErr.Error))
+		if p := recover(); p != nil || err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Error("Failed to rollback transaction: %v", rollbackErr)
 			}
 		}
 	}()
 
-	if err := fn(ctx); err != nil {
+	if err = fn(ctx); err != nil {
 		return err
 	}
 
-	done = true
-	if err := tx.Commit().Error; err != nil {
+	if err = tx.Commit().Error; err != nil {
 		return err
 	}
 
