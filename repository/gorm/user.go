@@ -70,8 +70,7 @@ func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
 		executor = tx
 	}
 
-	if err := executor.WithContext(ctx).Save(&userModel{
-		ID:       user.ID,
+	if err := executor.WithContext(ctx).Model(&userModel{}).Where("id = ?", user.ID).Updates(&userModel{
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,
