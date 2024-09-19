@@ -10,7 +10,6 @@ import (
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 
 	"github.com/tusmasoma/go-clean-arch/config"
-
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
 
@@ -52,13 +51,13 @@ func (am *authMiddleware) Authenticate(next http.Handler) http.Handler {
 		payload, err := am.ar.ValidateAccessToken(ctx, jwt)
 		if err != nil {
 			log.Warn("Authentication failed: invalid access token", log.Ferror(err))
-			http.Error(w, fmt.Sprintf("Authentication failed: %v", err), http.StatusUnauthorized)
+			http.Error(w, fmt.Sprintf("Authentication failed 1: %v", err), http.StatusUnauthorized)
 			return
 		}
 
 		ctx = context.WithValue(ctx, config.ContextUserIDKey, payload["userId"])
 
-		log.Info("Successfully Authentication", log.Fstring("userID", payload["userId"]))
+		log.Info("Successfully Authentication", log.Fstring("uid", payload["userId"]))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

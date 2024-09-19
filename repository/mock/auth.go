@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -34,45 +35,31 @@ func (m *MockAuthRepository) EXPECT() *MockAuthRepositoryMockRecorder {
 }
 
 // GenerateToken mocks base method.
-func (m *MockAuthRepository) GenerateToken(userID, email string) (string, string) {
+func (m *MockAuthRepository) GenerateToken(ctx context.Context, userID, email string) (string, string) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GenerateToken", userID, email)
+	ret := m.ctrl.Call(m, "GenerateToken", ctx, userID, email)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(string)
 	return ret0, ret1
 }
 
 // GenerateToken indicates an expected call of GenerateToken.
-func (mr *MockAuthRepositoryMockRecorder) GenerateToken(userID, email interface{}) *gomock.Call {
+func (mr *MockAuthRepositoryMockRecorder) GenerateToken(ctx, userID, email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateToken", reflect.TypeOf((*MockAuthRepository)(nil).GenerateToken), userID, email)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateToken", reflect.TypeOf((*MockAuthRepository)(nil).GenerateToken), ctx, userID, email)
 }
 
-// GetPayloadFromToken mocks base method.
-func (m *MockAuthRepository) GetPayloadFromToken(jwt string) (map[string]string, error) {
+// ValidateAccessToken mocks base method.
+func (m *MockAuthRepository) ValidateAccessToken(ctx context.Context, jwt string) (map[string]string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPayloadFromToken", jwt)
+	ret := m.ctrl.Call(m, "ValidateAccessToken", ctx, jwt)
 	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetPayloadFromToken indicates an expected call of GetPayloadFromToken.
-func (mr *MockAuthRepositoryMockRecorder) GetPayloadFromToken(jwt interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPayloadFromToken", reflect.TypeOf((*MockAuthRepository)(nil).GetPayloadFromToken), jwt)
-}
-
-// ValidateAccessToken mocks base method.
-func (m *MockAuthRepository) ValidateAccessToken(jwt string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateAccessToken", jwt)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
 // ValidateAccessToken indicates an expected call of ValidateAccessToken.
-func (mr *MockAuthRepositoryMockRecorder) ValidateAccessToken(jwt interface{}) *gomock.Call {
+func (mr *MockAuthRepositoryMockRecorder) ValidateAccessToken(ctx, jwt interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccessToken", reflect.TypeOf((*MockAuthRepository)(nil).ValidateAccessToken), jwt)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccessToken", reflect.TypeOf((*MockAuthRepository)(nil).ValidateAccessToken), ctx, jwt)
 }

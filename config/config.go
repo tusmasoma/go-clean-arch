@@ -14,8 +14,9 @@ type ContextKey string
 const ContextUserIDKey ContextKey = "userID"
 
 const (
-	mongoDBPrefix = "MONGO_DB_"
-	serverPrefix  = "SERVER_"
+	mongoDBPrefix  = "MONGO_DB_"
+	firebasePrefix = "FIREBASE_"
+	serverPrefix   = "SERVER_"
 )
 
 type DBConfig struct {
@@ -32,6 +33,11 @@ type MongoDBConfig struct {
 	User       string `env:"USER"`
 	Database   string `env:"DATABASE, required"`
 	Collection string `env:"COLLECTION, required"`
+}
+
+type FirebaseConfig struct {
+	APIKey          string `env:"API_KEY, required"`
+	CredentialsPath string `env:"CREDENTIALS_PATH, required"`
 }
 
 type CacheConfig struct {
@@ -66,6 +72,16 @@ func NewMongoDBConfig(ctx context.Context) (*MongoDBConfig, error) {
 		return nil, err
 	}
 
+	return conf, nil
+}
+
+func NewFirebaseConfig(ctx context.Context) (*FirebaseConfig, error) {
+	conf := &FirebaseConfig{}
+	pl := envconfig.PrefixLookuper(firebasePrefix, envconfig.OsLookuper())
+	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+		log.Error("Failed to load Firebase config", log.Ferror(err))
+		return nil, err
+	}
 	return conf, nil
 }
 

@@ -81,7 +81,7 @@ func (uuc *userUseCase) CreateUserAndToken(ctx context.Context, email string, pa
 		return "", err
 	}
 
-	jwt, _ := uuc.ar.GenerateToken(user.ID, user.Email)
+	jwt, _ := uuc.ar.GenerateToken(ctx, user.ID, user.Email)
 	return jwt, nil
 }
 

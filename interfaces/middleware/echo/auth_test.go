@@ -40,13 +40,10 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 		{
 			name: "success",
 			setup: func(m *mock.MockAuthRepository) {
-				m.EXPECT().ValidateAccessToken(jwt).Return(nil)
-				m.EXPECT().GetPayloadFromToken(jwt).Return(
-					map[string]string{
-						"userId": userID,
-						"email":  email,
-					}, nil,
-				)
+				m.EXPECT().ValidateAccessToken(gomock.Any(), jwt).Return(map[string]string{
+					"userId": userID,
+					"email":  email,
+				}, nil)
 			},
 			in: func() *http.Request {
 				req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -75,7 +72,10 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 		{
 			name: "Fail: Invalid Token",
 			setup: func(m *mock.MockAuthRepository) {
-				m.EXPECT().ValidateAccessToken("invalidToken").Return(errors.New("invalid token"))
+				m.EXPECT().ValidateAccessToken(gomock.Any(), "invalidToken").Return(
+					map[string]string{},
+					errors.New("invalid token"),
+				)
 			},
 			in: func() *http.Request {
 				req := httptest.NewRequest(http.MethodGet, "/", nil)
