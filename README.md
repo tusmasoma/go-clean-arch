@@ -105,7 +105,7 @@ The dependencies between the layers are as follows:
 > In this project, the Repository interface is implemented within the Repository Layer. Therefore, while it may appear that the Usecase Layer depends on the Repository Layer, it actually only depends on abstract interfaces, not concrete implementations. This approach adheres to the dependency rule. If you wish to manage dependencies more strictly, it is advisable to place the Repository interfaces as follows:
 >
 > ```
-> ./entity/
+> ./domain/
 > ├─ model/
 > └─ repository/
 > ```
