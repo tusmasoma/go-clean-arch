@@ -106,7 +106,7 @@ The dependencies between the layers are as follows:
 >
 > ```
 > ./domain/
-> ├─ model/
+> ├─ entity/
 > └─ repository/
 > ```
 
