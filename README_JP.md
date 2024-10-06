@@ -107,7 +107,7 @@ Interfaces Layerは、クリーンアーキテクチャの図における**Inter
 >
 > ```
 > ./domain/
-> ├─ model/
+> ├─ entity/
 > └─ repository/
 > ```
 
