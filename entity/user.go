@@ -2,17 +2,17 @@ package entity
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/google/uuid"
+	pe "github.com/tusmasoma/go-clean-arch/pkg/email"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
 type User struct {
-	ID       string `json:"id" bson:"_id,omitempty"`
-	Name     string `json:"name" bson:"name"`
-	Email    string `json:"email" bson:"email"`
-	Password string `json:"password" bson:"password"`
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func NewUser(email, password string) (*User, error) {
@@ -24,19 +24,14 @@ func NewUser(email, password string) (*User, error) {
 		log.Error("password is required")
 		return nil, errors.New("password is required")
 	}
-	name := extractNameFromEmail(email)
+	name, err := pe.GetAddressPart(email)
+	if err != nil {
+		return nil, errors.New("email is required")
+	}
 	return &User{
 		ID:       uuid.New().String(),
 		Name:     name,
 		Email:    email,
 		Password: password,
 	}, nil
-}
-
-func extractNameFromEmail(email string) string {
-	parts := strings.Split(email, "@")
-	if len(parts) > 0 {
-		return parts[0]
-	}
-	return "unknown"
 }
