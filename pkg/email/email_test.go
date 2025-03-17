@@ -50,7 +50,9 @@ func Test_GetAddressPart(t *testing.T) {
 	}
 
 	for _, tt := range patterns {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			gotAddress, err := GetAddressPart(tt.arg.email)
 			if gotAddress != tt.want.address {
 				t.Errorf("GetAddressPart gotAddress = %v, wantName %v", gotAddress, tt.want.address)
