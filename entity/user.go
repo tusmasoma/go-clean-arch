@@ -4,8 +4,9 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	pe "github.com/tusmasoma/go-clean-arch/pkg/email"
 	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	pe "github.com/tusmasoma/go-clean-arch/pkg/email"
 )
 
 type User struct {
