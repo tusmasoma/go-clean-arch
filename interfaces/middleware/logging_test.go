@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+	"github.com/tusmasoma/go-clean-arch/pkg/log"
 )
 
 func Test_Logging(t *testing.T) {
