@@ -38,7 +38,7 @@ func TestUserUseCase_GetUser(t *testing.T) {
 		{
 			name: "success",
 			ctx:  ctx,
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository) {
+			setup: func(m *mock.MockUserRepository, _ *mock.MockTransactionRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,
@@ -135,7 +135,7 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 		},
 		{
 			name: "Fail: Username already exists",
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository, m2 *mock.MockAuthRepository) {
+			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository, _ *mock.MockAuthRepository) {
 				m1.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
 					return fn(ctx)
 				})
@@ -212,7 +212,7 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository) {
+			setup: func(m *mock.MockUserRepository, _ *mock.MockTransactionRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,

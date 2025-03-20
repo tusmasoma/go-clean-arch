@@ -14,8 +14,7 @@ type ContextKey string
 const ContextUserIDKey ContextKey = "userID"
 
 const (
-	mongoDBPrefix = "MONGO_DB_"
-	serverPrefix  = "SERVER_"
+	serverPrefix = "SERVER_"
 )
 
 type DBConfig struct {
@@ -24,14 +23,6 @@ type DBConfig struct {
 	User     string `env:"USER, required"`
 	Password string `env:"PASSWORD, required"`
 	DBName   string `env:"DB_NAME, required"`
-}
-
-type MongoDBConfig struct {
-	URI        string `env:"URI, required"`
-	Password   string `env:"PASSWORD"`
-	User       string `env:"USER"`
-	Database   string `env:"DATABASE, required"`
-	Collection string `env:"COLLECTION, required"`
 }
 
 type CacheConfig struct {
@@ -51,28 +42,23 @@ type ServerConfig struct {
 func NewDBConfig(ctx context.Context, dbPrefix string) (*DBConfig, error) {
 	conf := &DBConfig{}
 	pl := envconfig.PrefixLookuper(dbPrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
+		Target:   conf,
+		Lookuper: pl,
+	}); err != nil {
 		log.Error("Failed to load database config", log.Ferror(err))
 		return nil, err
 	}
 	return conf, nil
 }
 
-func NewMongoDBConfig(ctx context.Context) (*MongoDBConfig, error) {
-	conf := &MongoDBConfig{}
-	pl := envconfig.PrefixLookuper(mongoDBPrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
-		log.Error("Failed to load MongoDB config", log.Ferror(err))
-		return nil, err
-	}
-
-	return conf, nil
-}
-
 func NewCacheConfig(ctx context.Context, cachePrefix string) (*CacheConfig, error) {
 	conf := &CacheConfig{}
 	pl := envconfig.PrefixLookuper(cachePrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
+		Target:   conf,
+		Lookuper: pl,
+	}); err != nil {
 		log.Error("Failed to load cache config", log.Ferror(err))
 		return nil, err
 	}
@@ -82,7 +68,10 @@ func NewCacheConfig(ctx context.Context, cachePrefix string) (*CacheConfig, erro
 func NewServerConfig(ctx context.Context) (*ServerConfig, error) {
 	conf := &ServerConfig{}
 	pl := envconfig.PrefixLookuper(serverPrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, conf, pl); err != nil {
+	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
+		Target:   conf,
+		Lookuper: pl,
+	}); err != nil {
 		log.Error("Failed to load server config", log.Ferror(err))
 		return nil, err
 	}

@@ -18,7 +18,7 @@ func Test_JWTToken(t *testing.T) {
 	jwt, jti := repo.GenerateToken(userID.String(), email)
 
 	// JWTのフォーマットが正しいことを確認
-	token, err := jwtgo.Parse(jwt, func(token *jwtgo.Token) (interface{}, error) {
+	token, err := jwtgo.Parse(jwt, func(_ *jwtgo.Token) (interface{}, error) {
 		// ここで公開キーを使って署名を検証する（公開キーは環境に依存する）
 		return loadPublicKey(rawPublicKey)
 	})

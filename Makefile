@@ -9,7 +9,7 @@ GO_ENV ?= GOPRIVATE=github.com/tusmasoma GOBIN=$(BIN)
 # tools
 $(shell mkdir -p $(BIN))
 
-GOLANGCI_LINT_VERSION := v1.56.0
+GOLANGCI_LINT_VERSION := v1.64.0
 $(BIN)/golangci-lint-$(GOLANGCI_LINT_VERSION):
 	unlink $(BIN)/golangci-lint || true
 	$(GO_ENV) ${GO} install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)

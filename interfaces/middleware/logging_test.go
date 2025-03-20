@@ -23,7 +23,7 @@ func Test_Logging(t *testing.T) {
 	}{
 		{
 			name: "successful request",
-			handler: func(w http.ResponseWriter, r *http.Request) {
+			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte("OK")) //nolint:errcheck // ignore error
 			},
@@ -33,7 +33,7 @@ func Test_Logging(t *testing.T) {
 		},
 		{
 			name: "client error request",
-			handler: func(w http.ResponseWriter, r *http.Request) {
+			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte("Bad Request")) //nolint:errcheck // ignore error
 			},
