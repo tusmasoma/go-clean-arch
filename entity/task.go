@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
 // The introduction of a custom Priority type was considered,
@@ -71,7 +70,6 @@ func (t *Task) CheckDueSoon() bool {
 
 func (t *Task) SetPriority(priority int) error {
 	if !ValidPriorities[priority] {
-		log.Error("priority must be between 1 and 5")
 		return errors.New("priority must be between 1 and 5")
 	}
 	t.Priority = priority
@@ -80,20 +78,16 @@ func (t *Task) SetPriority(priority int) error {
 
 func NewTask(userID, title, description string, dueDate time.Time, priority int) (*Task, error) {
 	if userID == "" {
-		log.Error("userID is required")
 		return nil, errors.New("userID is required")
 	}
 	if title == "" {
-		log.Error("title is required")
 		return nil, errors.New("title is required")
 	}
 	if description == "" {
-		log.Error("description is required")
 		return nil, errors.New("description is required")
 	}
 	// TODO: Check if dueDate is in the future
 	if !ValidPriorities[priority] {
-		log.Error("priority must be between 1 and 5")
 		return nil, errors.New("priority must be between 1 and 5")
 	}
 	return &Task{

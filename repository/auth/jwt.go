@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -191,7 +190,6 @@ func (ar *authRepository) ValidateAccessToken(jwt string) error {
 	}
 
 	err = rsa.VerifyPKCS1v15(pubKey, crypto.SHA256, hashed[:], signature)
-	log.Print(err)
 	if err != nil {
 		return fmt.Errorf("signature verification failed: %w", err)
 	}

@@ -6,8 +6,9 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 	"go.uber.org/dig"
+
+	"github.com/tusmasoma/go-clean-arch/pkg/log"
 
 	"github.com/tusmasoma/go-clean-arch/config"
 	handler "github.com/tusmasoma/go-clean-arch/interfaces/handler"

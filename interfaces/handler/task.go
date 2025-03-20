@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
-
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 )
@@ -42,14 +40,12 @@ func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		log.Warn("ID is required")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	task, err := th.tuc.GetTask(ctx, id)
 	if err != nil {
-		log.Error("Failed to get task", log.Ferror(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -85,7 +81,6 @@ func (th *taskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
 
 	tasks, err := th.tuc.ListTasks(ctx)
 	if err != nil {
-		log.Error("Failed to list tasks", log.Ferror(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -143,7 +138,6 @@ func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	var requestBody CreateTaskRequest
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
-		log.Error("Failed to decode request body", log.Ferror(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -154,7 +148,6 @@ func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	params := th.convertCreateTaskReqeuestToParams(requestBody)
 	if err := th.tuc.CreateTask(ctx, params); err != nil {
-		log.Error("Failed to create task", log.Ferror(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -167,7 +160,6 @@ func (th *taskHandler) isValidCreateTasksRequest(requestBody *CreateTaskRequest)
 		requestBody.Description == "" ||
 		requestBody.DueDate.IsZero() ||
 		!entity.ValidPriorities[requestBody.Priority] {
-		log.Warn("Invalid request body: %v", requestBody)
 		return false
 	}
 	return true
@@ -196,7 +188,6 @@ func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	var requestBody UpdateTaskRequest
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
-		log.Error("Failed to decode request body", log.Ferror(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -207,7 +198,6 @@ func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	params := th.convertUpdateTaskReqeuestToParams(requestBody)
 	if err := th.tuc.UpdateTask(ctx, params); err != nil {
-		log.Error("Failed to update task", log.Ferror(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -221,7 +211,6 @@ func (th *taskHandler) isValidUpdateTasksRequest(requestBody *UpdateTaskRequest)
 		requestBody.Description == "" ||
 		requestBody.DueDate.IsZero() ||
 		!entity.ValidPriorities[requestBody.Priority] {
-		log.Warn("Invalid request body: %v", requestBody)
 		return false
 	}
 	return true
@@ -241,13 +230,11 @@ func (th *taskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		log.Warn("ID is required")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	if err := th.tuc.DeleteTask(ctx, id); err != nil {
-		log.Error("Failed to delete task", log.Ferror(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

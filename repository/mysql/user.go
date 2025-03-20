@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
-
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
@@ -154,10 +152,8 @@ func (ur *userRepository) LockUserByEmail(ctx context.Context, email string) (bo
 	var id string
 	if err := row.Scan(&id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			log.Info("No user found with the provided email", log.Fstring("email", email))
 			return false, nil
 		}
-		log.Error("Failed to scan row", log.Ferror(err))
 		return false, err
 	}
 	return true, nil

@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/sethvargo/go-envconfig"
-
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 )
 
 type ContextKey string
@@ -46,7 +44,6 @@ func NewDBConfig(ctx context.Context, dbPrefix string) (*DBConfig, error) {
 		Target:   conf,
 		Lookuper: pl,
 	}); err != nil {
-		log.Error("Failed to load database config", log.Ferror(err))
 		return nil, err
 	}
 	return conf, nil
@@ -59,7 +56,6 @@ func NewCacheConfig(ctx context.Context, cachePrefix string) (*CacheConfig, erro
 		Target:   conf,
 		Lookuper: pl,
 	}); err != nil {
-		log.Error("Failed to load cache config", log.Ferror(err))
 		return nil, err
 	}
 	return conf, nil
@@ -72,7 +68,6 @@ func NewServerConfig(ctx context.Context) (*ServerConfig, error) {
 		Target:   conf,
 		Lookuper: pl,
 	}); err != nil {
-		log.Error("Failed to load server config", log.Ferror(err))
 		return nil, err
 	}
 	return conf, nil

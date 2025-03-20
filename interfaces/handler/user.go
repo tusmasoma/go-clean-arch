@@ -5,8 +5,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
-
 	"github.com/tusmasoma/go-clean-arch/usecase"
 )
 
@@ -80,11 +78,9 @@ func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (uh *userHandler) isValidCreateUserRequest(body io.ReadCloser, requestBody *CreateUserRequest) bool {
 	if err := json.NewDecoder(body).Decode(requestBody); err != nil {
-		log.Error("Failed to decode request body: %v", err)
 		return false
 	}
 	if requestBody.Email == "" || requestBody.Password == "" {
-		log.Warn("Invalid request body: %v", requestBody)
 		return false
 	}
 	return true
@@ -115,11 +111,9 @@ func (uh *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func (uh *userHandler) isValidUpdateUserRequest(body io.ReadCloser, requestBody *UpdateUserRequest) bool {
 	if err := json.NewDecoder(body).Decode(requestBody); err != nil {
-		log.Error("Failed to decode request body: %v", err)
 		return false
 	}
 	if requestBody.Name == "" {
-		log.Warn("Invalid request body: %v", requestBody)
 		return false
 	}
 	return true

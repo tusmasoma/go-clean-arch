@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
 
 	pe "github.com/tusmasoma/go-clean-arch/pkg/email"
 )
@@ -18,11 +17,9 @@ type User struct {
 
 func NewUser(email, password string) (*User, error) {
 	if email == "" {
-		log.Error("email is required")
 		return nil, errors.New("email is required")
 	}
 	if password == "" {
-		log.Error("password is required")
 		return nil, errors.New("password is required")
 	}
 	name, err := pe.GetAddressPart(email)

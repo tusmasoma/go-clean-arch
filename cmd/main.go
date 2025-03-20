@@ -11,7 +11,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	"github.com/tusmasoma/go-clean-arch/pkg/log"
 
 	"github.com/tusmasoma/go-clean-arch/config"
 )
