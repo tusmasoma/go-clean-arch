@@ -31,14 +31,13 @@ func TestUserUseCase_GetUser(t *testing.T) {
 		ctx   context.Context
 		setup func(
 			m *mock.MockUserRepository,
-			m1 *mock.MockTransactionRepository,
 		)
 		wantErr error
 	}{
 		{
 			name: "success",
 			ctx:  ctx,
-			setup: func(m *mock.MockUserRepository, _ *mock.MockTransactionRepository) {
+			setup: func(m *mock.MockUserRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,
@@ -59,14 +58,13 @@ func TestUserUseCase_GetUser(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			ur := mock.NewMockUserRepository(ctrl)
-			tr := mock.NewMockTransactionRepository(ctrl)
 			ar := mock.NewMockAuthRepository(ctrl)
 
 			if tt.setup != nil {
-				tt.setup(ur, tr)
+				tt.setup(ur)
 			}
 
-			usecase := NewUserUseCase(ur, tr, ar)
+			usecase := NewUserUseCase(ur, ar)
 			_, err := usecase.GetUser(tt.ctx)
 
 			if (err != nil) != (tt.wantErr != nil) {
@@ -85,7 +83,6 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 		name  string
 		setup func(
 			m *mock.MockUserRepository,
-			m1 *mock.MockTransactionRepository,
 			m2 *mock.MockAuthRepository,
 		)
 		arg struct {
@@ -97,14 +94,7 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository, m2 *mock.MockAuthRepository) {
-				m1.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
-					return fn(ctx)
-				})
-				m.EXPECT().LockUserByEmail(
-					gomock.Any(),
-					"test@gmail.com",
-				).Return(false, nil)
+			setup: func(m *mock.MockUserRepository, m2 *mock.MockAuthRepository) {
 				m.EXPECT().Create(
 					gomock.Any(),
 					gomock.Any(),
@@ -134,15 +124,12 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "Fail: Username already exists",
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository, _ *mock.MockAuthRepository) {
-				m1.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
-					return fn(ctx)
-				})
-				m.EXPECT().LockUserByEmail(
+			name: "Fail: user email already exists",
+			setup: func(m *mock.MockUserRepository, _ *mock.MockAuthRepository) {
+				m.EXPECT().Create(
 					gomock.Any(),
-					"test@gmail.com",
-				).Return(true, nil)
+					gomock.Any(),
+				).Return(errors.New("user with this email already exists"))
 			},
 			arg: struct {
 				ctx      context.Context
@@ -163,14 +150,13 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			ur := mock.NewMockUserRepository(ctrl)
-			tr := mock.NewMockTransactionRepository(ctrl)
 			ar := mock.NewMockAuthRepository(ctrl)
 
 			if tt.setup != nil {
-				tt.setup(ur, tr, ar)
+				tt.setup(ur, ar)
 			}
 
-			usecase := NewUserUseCase(ur, tr, ar)
+			usecase := NewUserUseCase(ur, ar)
 			jwt, err := usecase.CreateUserAndToken(tt.arg.ctx, tt.arg.email, tt.arg.password)
 
 			if (err != nil) != (tt.wantErr != nil) {
@@ -202,7 +188,6 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 		name  string
 		setup func(
 			m *mock.MockUserRepository,
-			m1 *mock.MockTransactionRepository,
 		)
 		arg struct {
 			ctx  context.Context
@@ -212,7 +197,7 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockUserRepository, _ *mock.MockTransactionRepository) {
+			setup: func(m *mock.MockUserRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,
@@ -251,14 +236,13 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			ur := mock.NewMockUserRepository(ctrl)
-			tr := mock.NewMockTransactionRepository(ctrl)
 			ar := mock.NewMockAuthRepository(ctrl)
 
 			if tt.setup != nil {
-				tt.setup(ur, tr)
+				tt.setup(ur)
 			}
 
-			usecase := NewUserUseCase(ur, tr, ar)
+			usecase := NewUserUseCase(ur, ar)
 			err := usecase.UpdateUser(tt.arg.ctx, tt.arg.name)
 
 			if (err != nil) != (tt.wantErr != nil) {

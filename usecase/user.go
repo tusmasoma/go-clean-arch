@@ -19,18 +19,15 @@ type UserUseCase interface {
 
 type userUseCase struct {
 	ur repository.UserRepository
-	tr repository.TransactionRepository
 	ar repository.AuthRepository
 }
 
 func NewUserUseCase(
 	ur repository.UserRepository,
-	tr repository.TransactionRepository,
 	ar repository.AuthRepository,
 ) UserUseCase {
 	return &userUseCase{
 		ur: ur,
-		tr: tr,
 		ar: ar,
 	}
 }
@@ -49,30 +46,13 @@ func (uuc *userUseCase) GetUser(ctx context.Context) (*entity.User, error) {
 }
 
 func (uuc *userUseCase) CreateUserAndToken(ctx context.Context, email string, password string) (string, error) {
-	var user *entity.User
-	if err := uuc.tr.Transaction(ctx, func(ctx context.Context) error {
-		exists, err := uuc.ur.LockUserByEmail(ctx, email)
-		if err != nil {
-			return err
-		}
-		if exists {
-			return errors.New("user with this email already exists")
-		}
-
-		user, err = entity.NewUser(email, password) // hash password
-		if err != nil {
-			return err
-		}
-
-		if err = uuc.ur.Create(ctx, *user); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
+	user, err := entity.NewUser(email, password) // hash password
+	if err != nil {
 		return "", err
 	}
-
+	if err = uuc.ur.Create(ctx, *user); err != nil {
+		return "", err
+	}
 	jwt, _ := uuc.ar.GenerateToken(user.ID, user.Email)
 	return jwt, nil
 }
