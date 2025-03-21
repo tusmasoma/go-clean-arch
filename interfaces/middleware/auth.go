@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/tusmasoma/go-clean-arch/config"
-
-	"github.com/tusmasoma/go-clean-arch/repository"
+	"github.com/tusmasoma/go-clean-arch/pkg/jwt"
 )
 
 var ErrCacheMiss = errors.New("cache: key not found")
@@ -19,12 +18,12 @@ type AuthMiddleware interface {
 }
 
 type authMiddleware struct {
-	ar repository.AuthRepository
+	jwtGenerator jwt.Generator
 }
 
-func NewAuthMiddleware(ar repository.AuthRepository) AuthMiddleware {
+func NewAuthMiddleware(jwtGenerator jwt.Generator) AuthMiddleware {
 	return &authMiddleware{
-		ar: ar,
+		jwtGenerator: jwtGenerator,
 	}
 }
 
@@ -45,12 +44,12 @@ func (am *authMiddleware) Authenticate(next http.Handler) http.Handler {
 		}
 		jwt := parts[1]
 
-		if err := am.ar.ValidateAccessToken(jwt); err != nil {
+		if err := am.jwtGenerator.ValidateAccessToken(jwt); err != nil {
 			http.Error(w, fmt.Sprintf("Authentication failed: %v", err), http.StatusUnauthorized)
 			return
 		}
 
-		payload, err := am.ar.GetPayloadFromToken(jwt)
+		payload, err := am.jwtGenerator.GetPayloadFromToken(jwt)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Authentication failed: %v", err), http.StatusUnauthorized)
 			return

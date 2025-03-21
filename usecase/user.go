@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/tusmasoma/go-clean-arch/config"
+	"github.com/tusmasoma/go-clean-arch/pkg/jwt"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
 	"github.com/tusmasoma/go-clean-arch/repository"
@@ -19,16 +20,16 @@ type UserUseCase interface {
 
 type userUseCase struct {
 	ur repository.UserRepository
-	ar repository.AuthRepository
+	jg jwt.Generator
 }
 
 func NewUserUseCase(
 	ur repository.UserRepository,
-	ar repository.AuthRepository,
+	jg jwt.Generator,
 ) UserUseCase {
 	return &userUseCase{
 		ur: ur,
-		ar: ar,
+		jg: jg,
 	}
 }
 
@@ -53,7 +54,7 @@ func (uuc *userUseCase) CreateUserAndToken(ctx context.Context, email string, pa
 	if err = uuc.ur.Create(ctx, *user); err != nil {
 		return "", err
 	}
-	jwt, _ := uuc.ar.GenerateToken(user.ID, user.Email)
+	jwt, _ := uuc.jg.GenerateToken(user.ID, user.Email)
 	return jwt, nil
 }
 

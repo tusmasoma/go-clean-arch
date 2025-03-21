@@ -8,12 +8,12 @@ import (
 	"github.com/go-chi/cors"
 	"go.uber.org/dig"
 
+	"github.com/tusmasoma/go-clean-arch/pkg/jwt"
 	"github.com/tusmasoma/go-clean-arch/pkg/log"
 
 	"github.com/tusmasoma/go-clean-arch/config"
 	handler "github.com/tusmasoma/go-clean-arch/interfaces/handler"
 	middleware "github.com/tusmasoma/go-clean-arch/interfaces/middleware"
-	"github.com/tusmasoma/go-clean-arch/repository/auth"
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
@@ -37,7 +37,7 @@ func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 		mysql.NewMySQLDB,
 		mysql.NewTaskRepository,
 		mysql.NewUserRepository,
-		auth.NewAuthRepository,
+		jwt.NewGenerator,
 		usecase.NewTaskUseCase,
 		usecase.NewUserUseCase,
 		handler.NewTaskHandler,

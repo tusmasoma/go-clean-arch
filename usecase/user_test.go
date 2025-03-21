@@ -11,7 +11,8 @@ import (
 	"github.com/tusmasoma/go-clean-arch/config"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
-	"github.com/tusmasoma/go-clean-arch/repository/mock"
+	jm "github.com/tusmasoma/go-clean-arch/pkg/jwt/mock"
+	rm "github.com/tusmasoma/go-clean-arch/repository/mock"
 )
 
 func TestUserUseCase_GetUser(t *testing.T) {
@@ -30,14 +31,14 @@ func TestUserUseCase_GetUser(t *testing.T) {
 		name  string
 		ctx   context.Context
 		setup func(
-			m *mock.MockUserRepository,
+			m *rm.MockUserRepository,
 		)
 		wantErr error
 	}{
 		{
 			name: "success",
 			ctx:  ctx,
-			setup: func(m *mock.MockUserRepository) {
+			setup: func(m *rm.MockUserRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,
@@ -57,8 +58,8 @@ func TestUserUseCase_GetUser(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			ur := mock.NewMockUserRepository(ctrl)
-			ar := mock.NewMockAuthRepository(ctrl)
+			ur := rm.NewMockUserRepository(ctrl)
+			ar := jm.NewMockGenerator(ctrl)
 
 			if tt.setup != nil {
 				tt.setup(ur)
@@ -82,8 +83,8 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 	patterns := []struct {
 		name  string
 		setup func(
-			m *mock.MockUserRepository,
-			m2 *mock.MockAuthRepository,
+			m *rm.MockUserRepository,
+			m2 *jm.MockGenerator,
 		)
 		arg struct {
 			ctx      context.Context
@@ -94,7 +95,7 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockUserRepository, m2 *mock.MockAuthRepository) {
+			setup: func(m *rm.MockUserRepository, m2 *jm.MockGenerator) {
 				m.EXPECT().Create(
 					gomock.Any(),
 					gomock.Any(),
@@ -125,7 +126,7 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 		},
 		{
 			name: "Fail: user email already exists",
-			setup: func(m *mock.MockUserRepository, _ *mock.MockAuthRepository) {
+			setup: func(m *rm.MockUserRepository, _ *jm.MockGenerator) {
 				m.EXPECT().Create(
 					gomock.Any(),
 					gomock.Any(),
@@ -149,8 +150,8 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			ur := mock.NewMockUserRepository(ctrl)
-			ar := mock.NewMockAuthRepository(ctrl)
+			ur := rm.NewMockUserRepository(ctrl)
+			ar := jm.NewMockGenerator(ctrl)
 
 			if tt.setup != nil {
 				tt.setup(ur, ar)
@@ -187,7 +188,7 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 	patterns := []struct {
 		name  string
 		setup func(
-			m *mock.MockUserRepository,
+			m *rm.MockUserRepository,
 		)
 		arg struct {
 			ctx  context.Context
@@ -197,7 +198,7 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockUserRepository) {
+			setup: func(m *rm.MockUserRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,
@@ -235,8 +236,8 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			ur := mock.NewMockUserRepository(ctrl)
-			ar := mock.NewMockAuthRepository(ctrl)
+			ur := rm.NewMockUserRepository(ctrl)
+			ar := jm.NewMockGenerator(ctrl)
 
 			if tt.setup != nil {
 				tt.setup(ur)

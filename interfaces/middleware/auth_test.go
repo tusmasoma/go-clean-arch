@@ -11,7 +11,7 @@ import (
 
 	"github.com/tusmasoma/go-clean-arch/config"
 
-	"github.com/tusmasoma/go-clean-arch/repository/mock"
+	"github.com/tusmasoma/go-clean-arch/pkg/jwt/mock"
 )
 
 func dummyTestHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,14 +32,14 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 	patterns := []struct {
 		name  string
 		setup func(
-			m *mock.MockAuthRepository,
+			m *mock.MockGenerator,
 		)
 		in         func() *http.Request
 		wantStatus int
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockAuthRepository) {
+			setup: func(m *mock.MockGenerator) {
 				m.EXPECT().ValidateAccessToken(jwt).Return(nil)
 				m.EXPECT().GetPayloadFromToken(jwt).Return(
 					map[string]string{
@@ -74,7 +74,7 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 		},
 		{
 			name: "Fail: Invalid Token",
-			setup: func(m *mock.MockAuthRepository) {
+			setup: func(m *mock.MockGenerator) {
 				m.EXPECT().ValidateAccessToken("invalidToken").Return(
 					errors.New("invalid token"),
 				)
@@ -94,7 +94,7 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			ar := mock.NewMockAuthRepository(ctrl)
+			ar := mock.NewMockGenerator(ctrl)
 
 			if tt.setup != nil {
 				tt.setup(ar)

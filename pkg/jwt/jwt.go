@@ -1,4 +1,5 @@
-package auth
+//go:generate mockgen -source=$GOFILE -package=mock -destination=./mock/$GOFILE
+package jwt
 
 import (
 	"crypto"
@@ -13,9 +14,9 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-
-	"github.com/tusmasoma/go-clean-arch/repository"
 )
+
+const expectedTokenParts = 3
 
 var (
 	rawPublicKey = []byte(`-----BEGIN PUBLIC KEY-----
@@ -58,18 +59,22 @@ gqj/bqUFw1aGvyEY1LPyTRODNLS1PhOYoe8cMOd1AoGBAONqJMqUIjNQqw7cYppu
 -----END PRIVATE KEY-----`)
 )
 
-type authRepository struct{}
+type Generator interface {
+	GenerateToken(userID, email string) (jwt string, jti string)
+	ValidateAccessToken(jwt string) error
+	GetPayloadFromToken(jwt string) (map[string]string, error)
+}
 
-func NewAuthRepository() repository.AuthRepository {
-	return &authRepository{}
+type generator struct{}
+
+func NewGenerator() Generator {
+	return &generator{}
 }
 
 // type Payload struct {
 // 	JTI    string `json:"jti"`
 // 	UserID string `json:"userId"`
 // }
-
-const expectedTokenParts = 3
 
 func loadPrivateKey(keyBytes []byte) (*rsa.PrivateKey, error) {
 	// PEMエンコードされたデータからPEMブロックをデコード
@@ -124,7 +129,7 @@ func base64UrlDecode(s string) ([]byte, error) {
 }
 
 // アクセストークン(JWT形式)の生成
-func (ar *authRepository) GenerateToken(userID, email string) (string, string) {
+func (g *generator) GenerateToken(userID, email string) (string, string) {
 	// ヘッダの作成
 	header := map[string]string{
 		"typ": "JWT",
@@ -166,7 +171,7 @@ func (ar *authRepository) GenerateToken(userID, email string) (string, string) {
 	return jwt, jti
 }
 
-func (ar *authRepository) ValidateAccessToken(jwt string) error {
+func (g *generator) ValidateAccessToken(jwt string) error {
 	// アクセストークンの検証
 	parts := strings.Split(jwt, ".")
 	if len(parts) != expectedTokenParts {
@@ -197,7 +202,7 @@ func (ar *authRepository) ValidateAccessToken(jwt string) error {
 	return nil
 }
 
-func (ar *authRepository) GetPayloadFromToken(jwt string) (map[string]string, error) {
+func (g *generator) GetPayloadFromToken(jwt string) (map[string]string, error) {
 	var emptyPayload map[string]string
 	// アクセストークンの検証
 	parts := strings.Split(jwt, ".")
