@@ -71,50 +71,35 @@ func NewGenerator() Generator {
 	return &generator{}
 }
 
-// type Payload struct {
-// 	JTI    string `json:"jti"`
-// 	UserID string `json:"userId"`
-// }
-
 func loadPrivateKey(keyBytes []byte) (*rsa.PrivateKey, error) {
-	// PEMエンコードされたデータからPEMブロックをデコード
 	block, _ := pem.Decode(keyBytes)
 	if block == nil || (block.Type != "RSA PRIVATE KEY" && block.Type != "PRIVATE KEY") {
 		return nil, fmt.Errorf("failed to decode PEM block containing the key")
 	}
-
-	// PEMブロックからRSA秘密鍵をパース
 	privInterface, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %w", err)
 	}
-
 	privKey, ok := privInterface.(*rsa.PrivateKey)
 	if !ok {
 		return nil, fmt.Errorf("not RSA private key")
 	}
-
 	return privKey, nil
 }
 
 func loadPublicKey(keyBytes []byte) (*rsa.PublicKey, error) {
-	// PEMエンコードされたデータからPEMブロックをデコード
 	block, _ := pem.Decode(keyBytes)
 	if block == nil || block.Type != "PUBLIC KEY" {
 		return nil, fmt.Errorf("failed to decode PEM block containing the key")
 	}
-
-	// PEMブロックからRSA公開鍵をパース
 	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse public key: %w", err)
 	}
-
 	pubKey, ok := pubInterface.(*rsa.PublicKey)
 	if !ok {
 		return nil, fmt.Errorf("not RSA public key")
 	}
-
 	return pubKey, nil
 }
 
@@ -128,17 +113,14 @@ func base64UrlDecode(s string) ([]byte, error) {
 	return base64.RawURLEncoding.DecodeString(s)
 }
 
-// アクセストークン(JWT形式)の生成
+// Generate JWT
 func (g *generator) GenerateToken(userID, email string) (string, string) {
-	// ヘッダの作成
 	header := map[string]string{
 		"typ": "JWT",
 		"alg": "RS256",
 	}
 	headerBytes, _ := json.Marshal(header)
 	encodedHeader := base64UrlEncode(headerBytes)
-
-	// ペイロードの作成
 	jti := uuid.New().String()
 	payload := map[string]string{
 		"jti":    jti,
@@ -147,14 +129,8 @@ func (g *generator) GenerateToken(userID, email string) (string, string) {
 	}
 	payloadBytes, _ := json.Marshal(payload)
 	encodedPayload := base64UrlEncode(payloadBytes)
-
-	// エンコードされたヘッダとペイロードを結合
 	jwtWithoutSignature := fmt.Sprintf("%s.%s", encodedHeader, encodedPayload)
-
-	// SHA-256ハッシュを計算
 	hashed := sha256.Sum256([]byte(jwtWithoutSignature))
-
-	// 署名作成
 	privKey, err := loadPrivateKey(rawSecretKey)
 	if err != nil {
 		panic(err)
@@ -164,65 +140,50 @@ func (g *generator) GenerateToken(userID, email string) (string, string) {
 		panic(err)
 	}
 	encodedSignature := base64UrlEncode(signature)
-
-	// JWTを完成
 	jwt := fmt.Sprintf("%s.%s", jwtWithoutSignature, encodedSignature)
 
 	return jwt, jti
 }
 
+// Validate JWT
 func (g *generator) ValidateAccessToken(jwt string) error {
-	// アクセストークンの検証
 	parts := strings.Split(jwt, ".")
 	if len(parts) != expectedTokenParts {
 		return fmt.Errorf("invalid token")
 	}
-	// エンコードされたヘッダとペイロードを結合
 	jwtWithoutSignature := fmt.Sprintf("%s.%s", parts[0], parts[1])
-	// SHA-256ハッシュを計算
 	hashed := sha256.Sum256([]byte(jwtWithoutSignature))
-
-	// 著名作成
 	signature, err := base64UrlDecode(parts[2])
 	if err != nil {
 		return fmt.Errorf("decoding failed: %w", err)
 	}
-
-	// 検証
 	pubKey, err := loadPublicKey(rawPublicKey)
 	if err != nil {
 		return err
 	}
-
 	err = rsa.VerifyPKCS1v15(pubKey, crypto.SHA256, hashed[:], signature)
 	if err != nil {
 		return fmt.Errorf("signature verification failed: %w", err)
 	}
-
 	return nil
 }
 
+// Get payload of JWT
 func (g *generator) GetPayloadFromToken(jwt string) (map[string]string, error) {
 	var emptyPayload map[string]string
-	// アクセストークンの検証
 	parts := strings.Split(jwt, ".")
 	if len(parts) != expectedTokenParts {
 		return emptyPayload, fmt.Errorf("invalid token")
 	}
-	// エンコードされたヘッダとペイロードを結合
 	encodedPayload := parts[1]
-	// Base64Urlデコード
 	payloadBytes, err := base64UrlDecode(encodedPayload)
 	if err != nil {
 		return emptyPayload, fmt.Errorf("decoding failed: %w", err)
 	}
-
-	// JSONデコード
 	var payload map[string]string
 	err = json.Unmarshal(payloadBytes, &payload)
 	if err != nil {
 		return emptyPayload, fmt.Errorf("JSON unmarshalling failed")
 	}
-
 	return payload, nil
 }

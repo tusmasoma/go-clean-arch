@@ -48,7 +48,6 @@ func Test_GetAddressPart(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {

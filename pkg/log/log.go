@@ -56,7 +56,6 @@ func newHandler(format string) slog.Handler {
 			ReplaceAttr: attrReplacerForDefault,
 		})
 	}
-
 	return slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level:       SeverityDefault,
 		ReplaceAttr: attrReplacerForDefault,
@@ -77,7 +76,6 @@ func attrReplacerForDefault(_ []string, attr slog.Attr) slog.Attr {
 //nolint:exhaustive // switch is used for future extensibility.
 func toLogLevel(level slog.Level) slog.Value {
 	var ls string
-
 	switch level {
 	case SeverityDebug:
 		ls = "DEBUG"
@@ -94,7 +92,6 @@ func toLogLevel(level slog.Level) slog.Value {
 	default:
 		ls = "DEFAULT"
 	}
-
 	return slog.StringValue(ls)
 }
 
