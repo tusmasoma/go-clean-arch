@@ -15,7 +15,7 @@ require (
 	github.com/sethvargo/go-envconfig v1.1.1
 	github.com/slack-go/slack v0.16.0
 	github.com/stretchr/testify v1.10.0
-	go.uber.org/dig v1.18.1
+	golang.org/x/crypto v0.36.0
 )
 
 require (

@@ -15,7 +15,7 @@ import (
 type UserUseCase interface {
 	GetUser(ctx context.Context) (*entity.User, error)
 	CreateUserAndToken(ctx context.Context, email string, passward string) (string, error)
-	UpdateUser(ctx context.Context, name string) error
+	UpdateUser(ctx context.Context, name, email string) error
 }
 
 type userUseCase struct {
@@ -47,7 +47,7 @@ func (uuc *userUseCase) GetUser(ctx context.Context) (*entity.User, error) {
 }
 
 func (uuc *userUseCase) CreateUserAndToken(ctx context.Context, email string, password string) (string, error) {
-	user, err := entity.NewUser(email, password) // hash password
+	user, err := entity.CreateUser(email, password)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +58,7 @@ func (uuc *userUseCase) CreateUserAndToken(ctx context.Context, email string, pa
 	return jwt, nil
 }
 
-func (uuc *userUseCase) UpdateUser(ctx context.Context, name string) error {
+func (uuc *userUseCase) UpdateUser(ctx context.Context, name, email string) error {
 	userIDValue := ctx.Value(config.ContextUserIDKey)
 	userID, ok := userIDValue.(string)
 	if !ok {
@@ -68,12 +68,9 @@ func (uuc *userUseCase) UpdateUser(ctx context.Context, name string) error {
 	if err != nil {
 		return err
 	}
-
-	// TODO: setter method for user
-	user.Name = name
-	// user.Email = email
-	// user.Password = password
-
+	if err = user.UpdateUser(name, email); err != nil {
+		return err
+	}
 	if err = uuc.ur.Update(ctx, *user); err != nil {
 		return err
 	}

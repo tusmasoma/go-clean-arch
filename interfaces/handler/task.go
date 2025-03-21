@@ -43,13 +43,11 @@ func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	task, err := th.tuc.GetTask(ctx, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(GetTaskResponse{
 		ID:          task.ID,
@@ -78,13 +76,11 @@ type ListTasksResponse struct {
 
 func (th *taskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	tasks, err := th.tuc.ListTasks(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	response := th.convertTasksToListTasksResponse(tasks)
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(response); err != nil {
@@ -134,7 +130,6 @@ type CreateTaskRequest struct {
 
 func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	var requestBody CreateTaskRequest
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
@@ -145,13 +140,11 @@ func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	params := th.convertCreateTaskReqeuestToParams(requestBody)
 	if err := th.tuc.CreateTask(ctx, params); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -184,7 +177,6 @@ type UpdateTaskRequest struct {
 
 func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	var requestBody UpdateTaskRequest
 	defer r.Body.Close()
 	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
@@ -195,13 +187,11 @@ func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	params := th.convertUpdateTaskReqeuestToParams(requestBody)
 	if err := th.tuc.UpdateTask(ctx, params); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -233,11 +223,9 @@ func (th *taskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	if err := th.tuc.DeleteTask(ctx, id); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusOK)
 }

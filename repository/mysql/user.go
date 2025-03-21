@@ -32,9 +32,7 @@ func (ur *userRepository) Get(ctx context.Context, id string) (*entity.User, err
 	FROM Users
 	WHERE id = ?
 	LIMIT 1`
-
 	row := ur.db.QueryRowContext(ctx, query, id)
-
 	var um userModel
 	if err := row.Scan(
 		&um.ID,
@@ -44,12 +42,16 @@ func (ur *userRepository) Get(ctx context.Context, id string) (*entity.User, err
 	); err != nil {
 		return nil, err
 	}
-	return &entity.User{
-		ID:       um.ID,
-		Name:     um.Name,
-		Email:    um.Email,
-		Password: um.Password,
-	}, nil
+	user, err := entity.NewUser(
+		um.ID,
+		um.Name,
+		um.Email,
+		um.Password,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 func (ur *userRepository) Create(ctx context.Context, user entity.User) error {
@@ -77,14 +79,12 @@ func (ur *userRepository) create(ctx context.Context, tx *sql.Tx, user entity.Us
 	)
 	VALUES (?, ?, ?, ?)
 	`
-
 	um := userModel{
 		ID:       user.ID,
 		Name:     user.Name,
 		Email:    user.Email,
-		Password: user.Password,
+		Password: user.PasswordHash,
 	}
-
 	if _, err := tx.ExecContext(
 		ctx,
 		query,
@@ -122,14 +122,12 @@ func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
 	SET name = ?, email = ?, password = ?
 	WHERE id = ?
 	`
-
 	um := userModel{
 		ID:       user.ID,
 		Name:     user.Name,
 		Email:    user.Email,
-		Password: user.Password,
+		Password: user.PasswordHash,
 	}
-
 	if _, err := ur.db.ExecContext(
 		ctx,
 		query,
@@ -147,7 +145,6 @@ func (ur *userRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM Users
 	WHERE id = ?
 	`
-
 	if _, err := ur.db.ExecContext(ctx, query, id); err != nil {
 		return err
 	}

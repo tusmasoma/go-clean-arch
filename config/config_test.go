@@ -11,7 +11,6 @@ import (
 
 func Test_NewDBConfig(t *testing.T) {
 	ctx := context.Background()
-
 	patterns := []struct {
 		name  string
 		setup func(t *testing.T)
@@ -45,12 +44,10 @@ func Test_NewDBConfig(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup(t)
-
 			got, err := NewDBConfig(ctx, "MYSQL_")
 			if err != nil {
 				require.ErrorIs(t, err, tt.err)
@@ -62,7 +59,6 @@ func Test_NewDBConfig(t *testing.T) {
 
 func Test_NewServerConfig(t *testing.T) {
 	ctx := context.Background()
-
 	patterns := []struct {
 		name  string
 		setup func(t *testing.T)
@@ -102,12 +98,10 @@ func Test_NewServerConfig(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup(t)
-
 			got, err := NewServerConfig(ctx)
 			require.NoError(t, err)
 			require.Equal(t, tt.want, got)

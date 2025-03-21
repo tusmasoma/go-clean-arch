@@ -18,13 +18,10 @@ import (
 
 func TestUseCase_GetTask(t *testing.T) {
 	t.Parallel()
-
 	userID := uuid.New().String()
 	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
-
 	taskID := uuid.New().String()
 	dueDate := time.Now().AddDate(0, 0, 1)
-
 	task := &entity.Task{
 		ID:          taskID,
 		UserID:      userID,
@@ -34,7 +31,6 @@ func TestUseCase_GetTask(t *testing.T) {
 		Priority:    3,
 		CreatedAt:   time.Now(),
 	}
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -93,29 +89,22 @@ func TestUseCase_GetTask(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			tr := mock.NewMockTaskRepository(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(tr)
 			}
-
 			tuc := NewTaskUseCase(tr)
-
 			getTask, err := tuc.GetTask(tt.arg.ctx, tt.arg.id)
-
 			if (err != nil) != (tt.want.err != nil) {
 				t.Errorf("GetTask() error = %v, wantErr %v", err, tt.want.err)
 			} else if err != nil && tt.want.err != nil && err.Error() != tt.want.err.Error() {
 				t.Errorf("GetTask() error = %v, wantErr %v", err, tt.want.err)
 			}
-
 			if !reflect.DeepEqual(getTask, tt.want.task) {
 				t.Errorf("GetTask() got = %v, want %v", getTask, tt.want.task)
 			}
@@ -125,11 +114,9 @@ func TestUseCase_GetTask(t *testing.T) {
 
 func TestUseCase_ListTasks(t *testing.T) {
 	t.Parallel()
-
 	userID := uuid.New().String()
 	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
 	dueDate := time.Now().AddDate(0, 0, 1)
-
 	tasks := []entity.Task{
 		{
 			ID:          uuid.New().String(),
@@ -141,7 +128,6 @@ func TestUseCase_ListTasks(t *testing.T) {
 			CreatedAt:   time.Now(),
 		},
 	}
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -177,29 +163,22 @@ func TestUseCase_ListTasks(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			tr := mock.NewMockTaskRepository(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(tr)
 			}
-
 			tuc := NewTaskUseCase(tr)
-
 			getTasks, err := tuc.ListTasks(tt.arg.ctx)
-
 			if (err != nil) != (tt.want.err != nil) {
 				t.Errorf("ListTasks() error = %v, wantErr %v", err, tt.want.err)
 			} else if err != nil && tt.want.err != nil && err.Error() != tt.want.err.Error() {
 				t.Errorf("ListTasks() error = %v, wantErr %v", err, tt.want.err)
 			}
-
 			if !reflect.DeepEqual(getTasks, tt.want.tasks) {
 				t.Errorf("ListTasks() got = %v, want %v", getTasks, tt.want.tasks)
 			}
@@ -209,11 +188,9 @@ func TestUseCase_ListTasks(t *testing.T) {
 
 func TestUseCase_CreateTask(t *testing.T) { //nolint: gocognit // The complexity is caused by the test patterns
 	t.Parallel()
-
 	userID := uuid.New().String()
 	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
-	dueDate := time.Now().AddDate(0, 0, 1)
-
+	dueDate := time.Now().AddDate(0, 0, 1).UTC().Truncate(time.Second)
 	patterns := []struct {
 		name  string
 		setup func(
@@ -264,23 +241,17 @@ func TestUseCase_CreateTask(t *testing.T) { //nolint: gocognit // The complexity
 			wantErr: nil,
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			tr := mock.NewMockTaskRepository(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(tr)
 			}
-
 			tuc := NewTaskUseCase(tr)
-
 			err := tuc.CreateTask(tt.arg.ctx, tt.arg.params)
-
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("want: %v, got: %v", tt.wantErr, err)
 			}
@@ -290,12 +261,10 @@ func TestUseCase_CreateTask(t *testing.T) { //nolint: gocognit // The complexity
 
 func TestUseCase_UpdateTask(t *testing.T) { //nolint: gocognit // The complexity is caused by the test patterns
 	t.Parallel()
-
 	userID := uuid.New().String()
 	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
 	taskID := uuid.New().String()
-	dueDate := time.Now().AddDate(0, 0, 1)
-
+	dueDate := time.Now().AddDate(0, 0, 1).UTC().Truncate(time.Second)
 	task := &entity.Task{
 		ID:          taskID,
 		UserID:      userID,
@@ -305,7 +274,6 @@ func TestUseCase_UpdateTask(t *testing.T) { //nolint: gocognit // The complexity
 		Priority:    3,
 		CreatedAt:   time.Now(),
 	}
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -387,23 +355,17 @@ func TestUseCase_UpdateTask(t *testing.T) { //nolint: gocognit // The complexity
 			wantErr: errors.New("task does not belong to the user"),
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			tr := mock.NewMockTaskRepository(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(tr)
 			}
-
 			tuc := NewTaskUseCase(tr)
-
 			err := tuc.UpdateTask(tt.arg.ctx, tt.arg.params)
-
 			if (err != nil) != (tt.wantErr != nil) {
 				t.Errorf("UpdateTask() error = %v, wantErr %v", err, tt.wantErr)
 			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
@@ -415,11 +377,9 @@ func TestUseCase_UpdateTask(t *testing.T) { //nolint: gocognit // The complexity
 
 func TestUsaCase_DeleteTask(t *testing.T) {
 	t.Parallel()
-
 	userID := uuid.New().String()
 	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
 	taskID := uuid.New().String()
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -473,23 +433,17 @@ func TestUsaCase_DeleteTask(t *testing.T) {
 			wantErr: errors.New("task does not belong to the user"),
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			tr := mock.NewMockTaskRepository(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(tr)
 			}
-
 			tuc := NewTaskUseCase(tr)
-
 			err := tuc.DeleteTask(tt.arg.ctx, tt.arg.id)
-
 			if (err != nil) != (tt.wantErr != nil) {
 				t.Errorf("DeleteTask() error = %v, wantErr %v", err, tt.wantErr)
 			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {

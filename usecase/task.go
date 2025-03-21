@@ -36,12 +36,10 @@ func (tuc *taskUseCase) GetTask(ctx context.Context, id string) (*entity.Task, e
 	if !ok {
 		return nil, errors.New("user name not found in request context")
 	}
-
 	task, err := tuc.tr.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-
 	if task.UserID != userID {
 		return nil, errors.New("task does not belong to the user")
 	}
@@ -54,7 +52,6 @@ func (tuc *taskUseCase) ListTasks(ctx context.Context) ([]entity.Task, error) {
 	if !ok {
 		return nil, errors.New("user name not found in request context")
 	}
-
 	tasks, err := tuc.tr.List(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -75,8 +72,7 @@ func (tuc *taskUseCase) CreateTask(ctx context.Context, params *CreateTaskParams
 	if !ok {
 		return errors.New("user name not found in request context")
 	}
-
-	task, err := entity.NewTask(userID, params.Title, params.Description, params.DueDate, params.Priority)
+	task, err := entity.CreateTask(userID, params.Title, params.Description, params.DueDate, params.Priority)
 	if err != nil {
 		return err
 	}
@@ -100,23 +96,16 @@ func (tuc *taskUseCase) UpdateTask(ctx context.Context, params *UpdateTaskParams
 	if !ok {
 		return errors.New("user name not found in request context")
 	}
-
 	task, err := tuc.tr.Get(ctx, params.ID)
 	if err != nil {
 		return err
 	}
-
 	if task.UserID != userID {
 		return errors.New("task does not belong to the user")
 	}
-
-	task.Title = params.Title
-	task.Description = params.Description
-	task.DueDate = params.DueDate
-	if err = task.SetPriority(params.Priority); err != nil {
+	if err = task.UpdateTask(params.Title, params.Description, params.DueDate, params.Priority); err != nil {
 		return err
 	}
-
 	if err = tuc.tr.Update(ctx, *task); err != nil {
 		return err
 	}
@@ -129,16 +118,13 @@ func (tuc *taskUseCase) DeleteTask(ctx context.Context, id string) error {
 	if !ok {
 		return errors.New("user name not found in request context")
 	}
-
 	task, err := tuc.tr.Get(ctx, id)
 	if err != nil {
 		return err
 	}
-
 	if task.UserID != userID {
 		return errors.New("task does not belong to the user")
 	}
-
 	if err = tuc.tr.Delete(ctx, id); err != nil {
 		return err
 	}

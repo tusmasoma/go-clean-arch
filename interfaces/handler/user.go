@@ -32,13 +32,11 @@ type GetUserResponse struct {
 
 func (uh *userHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	user, err := uh.uuc.GetUser(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(GetUserResponse{
 		ID:    user.ID,
@@ -58,20 +56,17 @@ type CreateUserRequest struct {
 
 func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	var requestBody CreateUserRequest
 	defer r.Body.Close()
 	if !uh.isValidCreateUserRequest(r.Body, &requestBody) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	token, err := uh.uuc.CreateUserAndToken(ctx, requestBody.Email, requestBody.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	w.Header().Set("Authorization", "Bearer "+token)
 	w.WriteHeader(http.StatusOK)
 }
@@ -87,22 +82,23 @@ func (uh *userHandler) isValidCreateUserRequest(body io.ReadCloser, requestBody 
 }
 
 type UpdateUserRequest struct {
-	Name string `json:"name"`
-	// Email 	string `json:"email"`
-	// Password 	string `json:"password"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 func (uh *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	var requestBody UpdateUserRequest
 	defer r.Body.Close()
 	if !uh.isValidUpdateUserRequest(r.Body, &requestBody) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	if err := uh.uuc.UpdateUser(ctx, requestBody.Name); err != nil {
+	if err := uh.uuc.UpdateUser(
+		ctx,
+		requestBody.Name,
+		requestBody.Email,
+	); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -113,7 +109,7 @@ func (uh *userHandler) isValidUpdateUserRequest(body io.ReadCloser, requestBody 
 	if err := json.NewDecoder(body).Decode(requestBody); err != nil {
 		return false
 	}
-	if requestBody.Name == "" {
+	if requestBody.Name == "" || requestBody.Email == "" {
 		return false
 	}
 	return true

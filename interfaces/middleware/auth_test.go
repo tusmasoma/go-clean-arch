@@ -24,11 +24,9 @@ func dummyTestHandler(w http.ResponseWriter, r *http.Request) {
 
 func TestAuthMiddleware_Authenticate(t *testing.T) {
 	t.Parallel()
-
 	userID := uuid.New().String()
 	email := "test@gmail.com"
 	jwt := "eyJhbGciOiJIUzI1NiIsI.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0Ijo.SflKxwRJSMeKKF2QT4fwpMeJf36P"
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -87,26 +85,19 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 			wantStatus: http.StatusUnauthorized,
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			ar := mock.NewMockGenerator(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(ar)
 			}
-
 			am := NewAuthMiddleware(ar)
-
 			handler := am.Authenticate(http.HandlerFunc(dummyTestHandler))
-
 			recoder := httptest.NewRecorder()
 			handler.ServeHTTP(recoder, tt.in())
-
 			// ステータスコードの検証
 			if status := recoder.Code; status != tt.wantStatus {
 				t.Errorf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)

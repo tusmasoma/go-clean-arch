@@ -36,9 +36,7 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	WHERE id = ?
 	LIMIT 1
 	`
-
 	row := tr.db.QueryRowContext(ctx, query, id)
-
 	var tm taskModel
 	if err := row.Scan(
 		&tm.ID,
@@ -51,16 +49,19 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	); err != nil {
 		return nil, err
 	}
-
-	return &entity.Task{
-		ID:          tm.ID,
-		UserID:      tm.UserID,
-		Title:       tm.Title,
-		Description: tm.Description,
-		DueDate:     tm.DueDate,
-		Priority:    entity.Priority(tm.Priority),
-		CreatedAt:   tm.CreatedAt,
-	}, nil
+	task, err := entity.NewTask(
+		tm.ID,
+		tm.UserID,
+		tm.Title,
+		tm.Description,
+		tm.DueDate,
+		tm.Priority,
+		tm.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
 }
 
 func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
@@ -68,13 +69,11 @@ func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 	FROM Tasks
 	WHERE user_id = ?
 	`
-
 	rows, err := tr.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
 	var tms []taskModel
 	for rows.Next() {
 		var tm taskModel
@@ -94,20 +93,23 @@ func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-
 	tasks := make([]entity.Task, len(tms))
 	for i, tm := range tms {
-		tasks[i] = entity.Task{
-			ID:          tm.ID,
-			UserID:      tm.UserID,
-			Title:       tm.Title,
-			Description: tm.Description,
-			DueDate:     tm.DueDate,
-			Priority:    entity.Priority(tm.Priority),
-			CreatedAt:   tm.CreatedAt,
+		var task *entity.Task
+		task, err = entity.NewTask(
+			tm.ID,
+			tm.UserID,
+			tm.Title,
+			tm.Description,
+			tm.DueDate,
+			tm.Priority,
+			tm.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
 		}
+		tasks[i] = *task
 	}
-
 	return tasks, nil
 }
 
@@ -117,7 +119,6 @@ func (tr *taskRepository) Create(ctx context.Context, task entity.Task) error {
 	)
 	VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
-
 	tm := taskModel{
 		ID:          task.ID,
 		UserID:      task.UserID,
@@ -127,7 +128,6 @@ func (tr *taskRepository) Create(ctx context.Context, task entity.Task) error {
 		Priority:    int(task.Priority),
 		CreatedAt:   task.CreatedAt,
 	}
-
 	if _, err := tr.db.ExecContext(
 		ctx,
 		query,
@@ -149,7 +149,6 @@ func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
 	SET title = ?, description = ?, duedate = ?, priority = ?
 	WHERE id = ?
 	`
-
 	tm := taskModel{
 		ID:          task.ID,
 		Title:       task.Title,
@@ -157,7 +156,6 @@ func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
 		DueDate:     task.DueDate,
 		Priority:    int(task.Priority),
 	}
-
 	if _, err := tr.db.ExecContext(
 		ctx,
 		query,
@@ -176,7 +174,6 @@ func (tr *taskRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM Tasks
 	WHERE id = ?
 	`
-
 	if _, err := tr.db.ExecContext(ctx, query, id); err != nil {
 		return err
 	}

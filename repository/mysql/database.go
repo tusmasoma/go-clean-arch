@@ -24,10 +24,8 @@ func NewMySQLDB(ctx context.Context) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=true",
 		conf.User, conf.Password, conf.Host, conf.Port, conf.DBName)
-
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err

@@ -18,13 +18,11 @@ import (
 
 func TestUserHandler_GetUser(t *testing.T) {
 	t.Parallel()
-
 	user := entity.User{
 		ID:    uuid.New().String(),
 		Name:  "test",
 		Email: "test@gmail.com",
 	}
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -63,18 +61,14 @@ func TestUserHandler_GetUser(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			uuc := mock.NewMockUserUseCase(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(uuc)
 			}
-
 			handler := NewUserHandler(uuc)
 			recorder := httptest.NewRecorder()
 			handler.GetUser(recorder, tt.in())
-
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
 			}
@@ -84,7 +78,6 @@ func TestUserHandler_GetUser(t *testing.T) {
 
 func TestUserHandler_CreateUser(t *testing.T) {
 	t.Parallel()
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -130,18 +123,14 @@ func TestUserHandler_CreateUser(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			uuc := mock.NewMockUserUseCase(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(uuc)
 			}
-
 			handler := NewUserHandler(uuc)
 			recorder := httptest.NewRecorder()
 			handler.CreateUser(recorder, tt.in())
-
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
 			}
@@ -156,7 +145,6 @@ func TestUserHandler_CreateUser(t *testing.T) {
 
 func TestUserHandler_UpdateUser(t *testing.T) {
 	t.Parallel()
-
 	patterns := []struct {
 		name  string
 		setup func(
@@ -168,12 +156,12 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 		{
 			name: "success",
 			setup: func(m *mock.MockUserUseCase) {
-				m.EXPECT().UpdateUser(gomock.Any(), "updatedTest").Return(
+				m.EXPECT().UpdateUser(gomock.Any(), "updatedTest", "new_email@gmail.com").Return(
 					nil,
 				)
 			},
 			in: func() *http.Request {
-				userUpdateReq := UpdateUserRequest{Name: "updatedTest"}
+				userUpdateReq := UpdateUserRequest{Name: "updatedTest", Email: "new_email@gmail.com"}
 				reqBody, _ := json.Marshal(userUpdateReq)
 				req, _ := http.NewRequest(http.MethodPut, "/api/user/update", bytes.NewBuffer(reqBody))
 				return req
@@ -183,7 +171,17 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 		{
 			name: "Fail: invalid request of name",
 			in: func() *http.Request {
-				userUpdateReq := UpdateUserRequest{Name: ""}
+				userUpdateReq := UpdateUserRequest{Name: "", Email: "new_email@gmail.com"}
+				reqBody, _ := json.Marshal(userUpdateReq)
+				req, _ := http.NewRequest(http.MethodPut, "/api/user/update", bytes.NewBuffer(reqBody))
+				return req
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name: "Fail: invalid request of email",
+			in: func() *http.Request {
+				userUpdateReq := UpdateUserRequest{Name: "updatedTest", Email: ""}
 				reqBody, _ := json.Marshal(userUpdateReq)
 				req, _ := http.NewRequest(http.MethodPut, "/api/user/update", bytes.NewBuffer(reqBody))
 				return req
@@ -191,23 +189,18 @@ func TestUserHandler_UpdateUser(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
 			uuc := mock.NewMockUserUseCase(ctrl)
-
 			if tt.setup != nil {
 				tt.setup(uuc)
 			}
-
 			handler := NewUserHandler(uuc)
 			recorder := httptest.NewRecorder()
 			handler.UpdateUser(recorder, tt.in())
-
 			if status := recorder.Code; status != tt.wantStatus {
 				t.Fatalf("handler returned wrong status code: got %v want %v", status, tt.wantStatus)
 			}
