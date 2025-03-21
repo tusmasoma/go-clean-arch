@@ -11,34 +11,31 @@ import (
 	"github.com/tusmasoma/go-clean-arch/config"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
-	"github.com/tusmasoma/go-clean-arch/repository/mock"
+	jm "github.com/tusmasoma/go-clean-arch/pkg/jwt/mock"
+	rm "github.com/tusmasoma/go-clean-arch/repository/mock"
 )
 
 func TestUserUseCase_GetUser(t *testing.T) {
 	t.Parallel()
-
 	userID := uuid.New().String()
 	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
-
 	user := entity.User{
 		ID:    userID,
 		Name:  "test",
 		Email: "test@gmail.com",
 	}
-
 	patterns := []struct {
 		name  string
 		ctx   context.Context
 		setup func(
-			m *mock.MockUserRepository,
-			m1 *mock.MockTransactionRepository,
+			m *rm.MockUserRepository,
 		)
 		wantErr error
 	}{
 		{
 			name: "success",
 			ctx:  ctx,
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository) {
+			setup: func(m *rm.MockUserRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,
@@ -56,19 +53,14 @@ func TestUserUseCase_GetUser(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
-			ur := mock.NewMockUserRepository(ctrl)
-			tr := mock.NewMockTransactionRepository(ctrl)
-			ar := mock.NewMockAuthRepository(ctrl)
-
+			ur := rm.NewMockUserRepository(ctrl)
+			ar := jm.NewMockGenerator(ctrl)
 			if tt.setup != nil {
-				tt.setup(ur, tr)
+				tt.setup(ur)
 			}
-
-			usecase := NewUserUseCase(ur, tr, ar)
+			usecase := NewUserUseCase(ur, ar)
 			_, err := usecase.GetUser(tt.ctx)
-
 			if (err != nil) != (tt.wantErr != nil) {
 				t.Errorf("GetUser() error = %v, wantErr %v", err, tt.wantErr)
 			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
@@ -80,13 +72,11 @@ func TestUserUseCase_GetUser(t *testing.T) {
 
 func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 	t.Parallel()
-
 	patterns := []struct {
 		name  string
 		setup func(
-			m *mock.MockUserRepository,
-			m1 *mock.MockTransactionRepository,
-			m2 *mock.MockAuthRepository,
+			m *rm.MockUserRepository,
+			m2 *jm.MockGenerator,
 		)
 		arg struct {
 			ctx      context.Context
@@ -97,14 +87,7 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository, m2 *mock.MockAuthRepository) {
-				m1.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
-					return fn(ctx)
-				})
-				m.EXPECT().LockUserByEmail(
-					gomock.Any(),
-					"test@gmail.com",
-				).Return(false, nil)
+			setup: func(m *rm.MockUserRepository, m2 *jm.MockGenerator) {
 				m.EXPECT().Create(
 					gomock.Any(),
 					gomock.Any(),
@@ -115,7 +98,6 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 					if user.Name != "test" {
 						t.Errorf("unexpected Name: got %v, want %v", user.Name, "test")
 					}
-					// TODO: check password hash
 				}).Return(nil)
 				m2.EXPECT().GenerateToken(
 					gomock.Any(),
@@ -134,15 +116,12 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "Fail: Username already exists",
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository, m2 *mock.MockAuthRepository) {
-				m1.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn func(ctx context.Context) error) error {
-					return fn(ctx)
-				})
-				m.EXPECT().LockUserByEmail(
+			name: "Fail: user email already exists",
+			setup: func(m *rm.MockUserRepository, _ *jm.MockGenerator) {
+				m.EXPECT().Create(
 					gomock.Any(),
-					"test@gmail.com",
-				).Return(true, nil)
+					gomock.Any(),
+				).Return(errors.New("user with this email already exists"))
 			},
 			arg: struct {
 				ctx      context.Context
@@ -160,25 +139,19 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
-			ur := mock.NewMockUserRepository(ctrl)
-			tr := mock.NewMockTransactionRepository(ctrl)
-			ar := mock.NewMockAuthRepository(ctrl)
-
+			ur := rm.NewMockUserRepository(ctrl)
+			ar := jm.NewMockGenerator(ctrl)
 			if tt.setup != nil {
-				tt.setup(ur, tr, ar)
+				tt.setup(ur, ar)
 			}
-
-			usecase := NewUserUseCase(ur, tr, ar)
+			usecase := NewUserUseCase(ur, ar)
 			jwt, err := usecase.CreateUserAndToken(tt.arg.ctx, tt.arg.email, tt.arg.password)
-
 			if (err != nil) != (tt.wantErr != nil) {
 				t.Errorf("CreateUserAndToken() error = %v, wantErr %v", err, tt.wantErr)
 			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {
 				t.Errorf("CreateUserAndToken() error = %v, wantErr %v", err, tt.wantErr)
 			}
-
 			if tt.wantErr == nil && jwt == "" {
 				t.Error("Failed to generate token")
 			}
@@ -188,58 +161,60 @@ func TestUserUseCase_CreateUserAndToken(t *testing.T) {
 
 func TestUserUseCase_UpdateUser(t *testing.T) {
 	t.Parallel()
-
 	userID := uuid.New().String()
 	ctx := context.WithValue(context.Background(), config.ContextUserIDKey, userID)
-
 	user := entity.User{
 		ID:    userID,
 		Name:  "test",
 		Email: "test@gmail.com",
 	}
-
 	patterns := []struct {
 		name  string
 		setup func(
-			m *mock.MockUserRepository,
-			m1 *mock.MockTransactionRepository,
+			m *rm.MockUserRepository,
 		)
 		arg struct {
-			ctx  context.Context
-			name string
+			ctx   context.Context
+			name  string
+			email string
 		}
 		wantErr error
 	}{
 		{
 			name: "success",
-			setup: func(m *mock.MockUserRepository, m1 *mock.MockTransactionRepository) {
+			setup: func(m *rm.MockUserRepository) {
 				m.EXPECT().Get(
 					ctx,
 					userID,
 				).Return(&user, nil)
 				user.Name = "updatedName"
+				user.Email = "new_email@gmail.com"
 				m.EXPECT().Update(
 					gomock.Any(),
 					user,
 				).Return(nil)
 			},
 			arg: struct {
-				ctx  context.Context
-				name string
+				ctx   context.Context
+				name  string
+				email string
 			}{
-				ctx:  ctx,
-				name: "updatedName",
+				ctx:   ctx,
+				name:  "updatedName",
+				email: "new_email@gmail.com",
 			},
 			wantErr: nil,
 		},
 		{
 			name: "Fail: User ID not found in request context",
 			arg: struct {
-				ctx  context.Context
-				name string
+				ctx   context.Context
+				name  string
+				email string
 			}{
-				ctx:  context.Background(),
-				name: "updatedName",
+				ctx:   context.Background(),
+				name:  "updatedName",
+				email: "new_email@gmail.com",
 			},
 			wantErr: errors.New("user name not found in request context"),
 		},
@@ -248,19 +223,14 @@ func TestUserUseCase_UpdateUser(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
 			ctrl := gomock.NewController(t)
-			ur := mock.NewMockUserRepository(ctrl)
-			tr := mock.NewMockTransactionRepository(ctrl)
-			ar := mock.NewMockAuthRepository(ctrl)
-
+			ur := rm.NewMockUserRepository(ctrl)
+			ar := jm.NewMockGenerator(ctrl)
 			if tt.setup != nil {
-				tt.setup(ur, tr)
+				tt.setup(ur)
 			}
-
-			usecase := NewUserUseCase(ur, tr, ar)
-			err := usecase.UpdateUser(tt.arg.ctx, tt.arg.name)
-
+			usecase := NewUserUseCase(ur, ar)
+			err := usecase.UpdateUser(tt.arg.ctx, tt.arg.name, tt.arg.email)
 			if (err != nil) != (tt.wantErr != nil) {
 				t.Errorf("UpdateUser() error = %v, wantErr %v", err, tt.wantErr)
 			} else if err != nil && tt.wantErr != nil && err.Error() != tt.wantErr.Error() {

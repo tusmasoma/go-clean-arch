@@ -67,15 +67,15 @@ func (mr *MockUserUseCaseMockRecorder) GetUser(ctx interface{}) *gomock.Call {
 }
 
 // UpdateUser mocks base method.
-func (m *MockUserUseCase) UpdateUser(ctx context.Context, name string) error {
+func (m *MockUserUseCase) UpdateUser(ctx context.Context, name, email string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUser", ctx, name)
+	ret := m.ctrl.Call(m, "UpdateUser", ctx, name, email)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateUser indicates an expected call of UpdateUser.
-func (mr *MockUserUseCaseMockRecorder) UpdateUser(ctx, name interface{}) *gomock.Call {
+func (mr *MockUserUseCaseMockRecorder) UpdateUser(ctx, name, email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUserUseCase)(nil).UpdateUser), ctx, name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUserUseCase)(nil).UpdateUser), ctx, name, email)
 }

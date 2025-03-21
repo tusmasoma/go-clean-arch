@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
+	"github.com/tusmasoma/go-clean-arch/pkg/log"
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
 
@@ -20,7 +21,7 @@ type taskModel struct {
 }
 
 type taskRepository struct {
-	db SQLExecutor
+	db DB
 }
 
 func NewTaskRepository(db *sql.DB) repository.TaskRepository {
@@ -29,20 +30,13 @@ func NewTaskRepository(db *sql.DB) repository.TaskRepository {
 	}
 }
 
-func (ur *taskRepository) Get(ctx context.Context, id string) (*entity.Task, error) {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
+func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, error) {
 	query := `SELECT *
 	FROM Tasks
 	WHERE id = ?
 	LIMIT 1
 	`
-
-	row := executor.QueryRowContext(ctx, query, id)
-
+	row := tr.db.QueryRowContext(ctx, query, id)
 	var tm taskModel
 	if err := row.Scan(
 		&tm.ID,
@@ -55,35 +49,31 @@ func (ur *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 	); err != nil {
 		return nil, err
 	}
-
-	return &entity.Task{
-		ID:          tm.ID,
-		UserID:      tm.UserID,
-		Title:       tm.Title,
-		Description: tm.Description,
-		DueDate:     tm.DueDate,
-		Priority:    tm.Priority,
-		CreatedAt:   tm.CreatedAt,
-	}, nil
+	task, err := entity.NewTask(
+		tm.ID,
+		tm.UserID,
+		tm.Title,
+		tm.Description,
+		tm.DueDate,
+		tm.Priority,
+		tm.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
 }
 
-func (ur *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
+func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Task, error) {
 	query := `SELECT *
 	FROM Tasks
 	WHERE user_id = ?
 	`
-
-	rows, err := executor.QueryContext(ctx, query, userID)
+	rows, err := tr.db.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
 	var tms []taskModel
 	for rows.Next() {
 		var tm taskModel
@@ -103,46 +93,42 @@ func (ur *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-
 	tasks := make([]entity.Task, len(tms))
 	for i, tm := range tms {
-		tasks[i] = entity.Task{
-			ID:          tm.ID,
-			UserID:      tm.UserID,
-			Title:       tm.Title,
-			Description: tm.Description,
-			DueDate:     tm.DueDate,
-			Priority:    tm.Priority,
-			CreatedAt:   tm.CreatedAt,
+		var task *entity.Task
+		task, err = entity.NewTask(
+			tm.ID,
+			tm.UserID,
+			tm.Title,
+			tm.Description,
+			tm.DueDate,
+			tm.Priority,
+			tm.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
 		}
+		tasks[i] = *task
 	}
-
 	return tasks, nil
 }
 
-func (ur *taskRepository) Create(ctx context.Context, task entity.Task) error {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
+func (tr *taskRepository) Create(ctx context.Context, task entity.Task) error {
 	query := `INSERT INTO Tasks (
 	id, user_id, title, description, duedate, priority, created_at
 	)
 	VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
-
 	tm := taskModel{
 		ID:          task.ID,
 		UserID:      task.UserID,
 		Title:       task.Title,
 		Description: task.Description,
 		DueDate:     task.DueDate,
-		Priority:    task.Priority,
+		Priority:    int(task.Priority),
 		CreatedAt:   task.CreatedAt,
 	}
-
-	if _, err := executor.ExecContext(
+	if _, err := tr.db.ExecContext(
 		ctx,
 		query,
 		tm.ID,
@@ -158,26 +144,19 @@ func (ur *taskRepository) Create(ctx context.Context, task entity.Task) error {
 	return nil
 }
 
-func (ur *taskRepository) Update(ctx context.Context, task entity.Task) error {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
+func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
 	query := `UPDATE Tasks
 	SET title = ?, description = ?, duedate = ?, priority = ?
 	WHERE id = ?
 	`
-
 	tm := taskModel{
 		ID:          task.ID,
 		Title:       task.Title,
 		Description: task.Description,
 		DueDate:     task.DueDate,
-		Priority:    task.Priority,
+		Priority:    int(task.Priority),
 	}
-
-	if _, err := executor.ExecContext(
+	if _, err := tr.db.ExecContext(
 		ctx,
 		query,
 		tm.Title,
@@ -191,17 +170,32 @@ func (ur *taskRepository) Update(ctx context.Context, task entity.Task) error {
 	return nil
 }
 
-func (ur *taskRepository) Delete(ctx context.Context, id string) error {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
+func (tr *taskRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM Tasks
 	WHERE id = ?
 	`
+	if _, err := tr.db.ExecContext(ctx, query, id); err != nil {
+		return err
+	}
+	return nil
+}
 
-	if _, err := executor.ExecContext(ctx, query, id); err != nil {
+func (tr *taskRepository) transaction(ctx context.Context, fn func(ctx context.Context, tx *sql.Tx) error) error { //nolint: unused // ignore unused
+	tx, err := tr.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil || err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Error("Failed to rollback transaction: %v", rollbackErr)
+			}
+		}
+	}()
+	if err = fn(ctx, tx); err != nil {
+		return err
+	}
+	if err = tx.Commit(); err != nil {
 		return err
 	}
 	return nil

@@ -11,7 +11,6 @@ import (
 
 func Test_NewDBConfig(t *testing.T) {
 	ctx := context.Background()
-
 	patterns := []struct {
 		name  string
 		setup func(t *testing.T)
@@ -45,111 +44,11 @@ func Test_NewDBConfig(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup(t)
-
 			got, err := NewDBConfig(ctx, "MYSQL_")
-			if err != nil {
-				require.ErrorIs(t, err, tt.err)
-			}
-			require.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func Test_NewMongoDB(t *testing.T) {
-	ctx := context.Background()
-
-	patterns := []struct {
-		name  string
-		setup func(t *testing.T)
-		want  *MongoDBConfig
-		err   error
-	}{
-		{
-			name: "default",
-			setup: func(t *testing.T) {
-				t.Helper()
-			},
-			want: nil,
-			err:  envconfig.ErrMissingRequired,
-		},
-		{
-			name: "set envs",
-			setup: func(t *testing.T) {
-				t.Helper()
-				t.Setenv("MONGO_DB_URI", "mongodb://localhost:27017")
-				t.Setenv("MONGO_DB_USER", "root")
-				t.Setenv("MONGO_DB_PASSWORD", "pass")
-				t.Setenv("MONGO_DB_DATABASE", "database")
-				t.Setenv("MONGO_DB_COLLECTION", "col")
-			},
-			want: &MongoDBConfig{
-				URI:        "mongodb://localhost:27017",
-				Password:   "pass",
-				User:       "root",
-				Database:   "database",
-				Collection: "col",
-			},
-		},
-	}
-
-	for _, tt := range patterns {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			tt.setup(t)
-
-			got, err := NewMongoDBConfig(ctx)
-			if err != nil {
-				require.ErrorIs(t, err, tt.err)
-			}
-			require.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func Test_NewCacheConfig(t *testing.T) {
-	ctx := context.Background()
-
-	patterns := []struct {
-		name  string
-		setup func(t *testing.T)
-		want  *CacheConfig
-		err   error
-	}{
-		{
-			name: "default",
-			setup: func(t *testing.T) {
-				t.Helper()
-			},
-			want: nil,
-			err:  envconfig.ErrMissingRequired,
-		},
-		{
-			name: "set env",
-			setup: func(t *testing.T) {
-				t.Helper()
-				t.Setenv("REDIS_ADDR", "localhost:6379")
-				t.Setenv("REDIS_PASSWORD", "mypassword")
-				t.Setenv("REDIS_DB", "0")
-			},
-			want: &CacheConfig{
-				Addr:     "localhost:6379",
-				Password: "mypassword",
-				DB:       0,
-			},
-		},
-	}
-
-	for _, tt := range patterns {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			tt.setup(t)
-
-			got, err := NewCacheConfig(ctx, "REDIS_")
 			if err != nil {
 				require.ErrorIs(t, err, tt.err)
 			}
@@ -160,7 +59,6 @@ func Test_NewCacheConfig(t *testing.T) {
 
 func Test_NewServerConfig(t *testing.T) {
 	ctx := context.Background()
-
 	patterns := []struct {
 		name  string
 		setup func(t *testing.T)
@@ -200,12 +98,10 @@ func Test_NewServerConfig(t *testing.T) {
 			},
 		},
 	}
-
 	for _, tt := range patterns {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setup(t)
-
 			got, err := NewServerConfig(ctx)
 			require.NoError(t, err)
 			require.Equal(t, tt.want, got)

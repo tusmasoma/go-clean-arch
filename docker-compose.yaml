@@ -1,23 +1,6 @@
 version: "3"
 
 services:
-  redis:
-    container_name: todo_redis
-    image: redis:5.0
-    ports:
-      - 6379:6379
-
-  mongo:
-    container_name: todo_mongo
-    image: mongo:latest
-    ports:
-      - 27017:27017
-    volumes:
-      - mongo_data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: go-clean-arc
-
   mysql:
     container_name: todo_mysql
     image: mysql:5.7
@@ -31,22 +14,6 @@ services:
       - db-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-
-  # postgres:
-  #   container_name: todo_postgres
-  #   image: postgres:13
-  #   platform: linux/amd64
-  #   ports:
-  #     - 5432:5432
-  #   volumes:
-  #     - ./repository/postgres/init/:/docker-entrypoint-initdb.d
-  #     - ./repository/postgres/init/postgresql.cnf:/etc/postgresql/postgresql.conf
-  #     - db-data:/var/lib/postgresql/data
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${POSTGRES_DB_NAME}
-
   back:
     container_name: todo_back
     build:
@@ -60,20 +27,15 @@ services:
       - .env
     depends_on:
       - mysql
-      - mongo
-
   swagger-ui:
-    container_name: chat_swagger_ui
+    container_name: swagger_ui
     image: swaggerapi/swagger-ui:latest
     ports:
       - 3000:8080
     environment:
       SWAGGER_JSON: /api/api-document.yaml
     volumes:
-      - ./docs/api-document.yaml:/api/api-document.yaml:ro
-
+      - ./api-document.yaml:/api/api-document.yaml:ro
 volumes:
-  mongo_data:
-    driver: local
   db-data:
     driver: local

@@ -1,0 +1,51 @@
+package jwt
+
+import (
+	"reflect"
+	"testing"
+
+	jwtgo "github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+)
+
+func Test_JWTToken(t *testing.T) {
+	userID := uuid.MustParse("f6db2530-cd9b-4ac1-8dc1-38c795e6eec2")
+	email := "test@gmail.com"
+	g := NewGenerator()
+	// GenerateToken test
+	jwt, jti := g.GenerateToken(userID.String(), email)
+	token, err := jwtgo.Parse(jwt, func(_ *jwtgo.Token) (interface{}, error) {
+		return loadPublicKey(rawPublicKey)
+	})
+	if err != nil {
+		t.Errorf("Failed to parse JWT: %s", err)
+	}
+	claims, ok := token.Claims.(jwtgo.MapClaims)
+	if !ok {
+		t.Errorf("Failed to parse claims")
+	}
+	if claims["Email"] != email {
+		t.Errorf("Expected email %s, got %s", email, claims["Email"])
+	}
+	if claims["jti"] != jti {
+		t.Errorf("Expected JTI %s, got %s", jti, claims["jti"])
+	}
+	// ValidateAccessToken test
+	err = g.ValidateAccessToken(jwt)
+	if err != nil {
+		t.Errorf("Failed to ValidateAccessToken: %s", err)
+	}
+	// GetPayloadFromToken test
+	payload, err := g.GetPayloadFromToken(jwt)
+	if err != nil {
+		t.Errorf("Failed to GetPayloadFromToken: %s", err)
+	}
+	wantPayload := map[string]string{
+		"jti":    jti,
+		"userId": userID.String(),
+		"Email":  email,
+	}
+	if !reflect.DeepEqual(payload, wantPayload) {
+		t.Errorf("GetPayloadFromToken() \n got = %v,\n want = %v", payload, wantPayload)
+	}
+}

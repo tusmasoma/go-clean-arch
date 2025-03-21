@@ -1,0 +1,231 @@
+package handler
+
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+
+	"github.com/tusmasoma/go-clean-arch/entity"
+	"github.com/tusmasoma/go-clean-arch/usecase"
+)
+
+type TaskHandler interface {
+	GetTask(w http.ResponseWriter, r *http.Request)
+	ListTasks(w http.ResponseWriter, r *http.Request)
+	CreateTask(w http.ResponseWriter, r *http.Request)
+	UpdateTask(w http.ResponseWriter, r *http.Request)
+	DeleteTask(w http.ResponseWriter, r *http.Request)
+}
+
+type taskHandler struct {
+	tuc usecase.TaskUseCase
+}
+
+func NewTaskHandler(tuc usecase.TaskUseCase) TaskHandler {
+	return &taskHandler{
+		tuc: tuc,
+	}
+}
+
+type GetTaskResponse struct {
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	task, err := th.tuc.GetTask(ctx, id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(w).Encode(GetTaskResponse{
+		ID:          task.ID,
+		Title:       task.Title,
+		Description: task.Description,
+		DueDate:     task.DueDate,
+		Priority:    int(task.Priority),
+		CreatedAt:   task.CreatedAt,
+	}); err != nil {
+		http.Error(w, "Failed to encode task to JSON", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+type ListTasksResponse struct {
+	Tasks []struct {
+		ID          string    `json:"id"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		DueDate     time.Time `json:"due_date"`
+		Priority    int       `json:"priority"`
+		CreatedAt   time.Time `json:"created_at"`
+	} `json:"tasks"`
+}
+
+func (th *taskHandler) ListTasks(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	tasks, err := th.tuc.ListTasks(ctx)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	response := th.convertTasksToListTasksResponse(tasks)
+	w.Header().Set("Content-Type", "application/json")
+	if err = json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode tasks to JSON", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) ListTasksResponse {
+	var tasksResponse []struct {
+		ID          string    `json:"id"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		DueDate     time.Time `json:"due_date"`
+		Priority    int       `json:"priority"`
+		CreatedAt   time.Time `json:"created_at"`
+	}
+	for _, task := range tasks {
+		tasksResponse = append(tasksResponse, struct {
+			ID          string    `json:"id"`
+			Title       string    `json:"title"`
+			Description string    `json:"description"`
+			DueDate     time.Time `json:"due_date"`
+			Priority    int       `json:"priority"`
+			CreatedAt   time.Time `json:"created_at"`
+		}{
+			ID:          task.ID,
+			Title:       task.Title,
+			Description: task.Description,
+			DueDate:     task.DueDate,
+			Priority:    int(task.Priority),
+			CreatedAt:   task.CreatedAt,
+		})
+	}
+	return ListTasksResponse{
+		Tasks: tasksResponse,
+	}
+}
+
+type CreateTaskRequest struct {
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+}
+
+func (th *taskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var requestBody CreateTaskRequest
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !th.isValidCreateTasksRequest(&requestBody) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	params := th.convertCreateTaskReqeuestToParams(requestBody)
+	if err := th.tuc.CreateTask(ctx, params); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (th *taskHandler) isValidCreateTasksRequest(requestBody *CreateTaskRequest) bool {
+	if requestBody.Title == "" ||
+		requestBody.Description == "" ||
+		requestBody.DueDate.IsZero() ||
+		!entity.ValidPriorities[entity.Priority(requestBody.Priority)] {
+		return false
+	}
+	return true
+}
+
+func (th *taskHandler) convertCreateTaskReqeuestToParams(req CreateTaskRequest) *usecase.CreateTaskParams {
+	return &usecase.CreateTaskParams{
+		Title:       req.Title,
+		Description: req.Description,
+		DueDate:     req.DueDate,
+		Priority:    req.Priority,
+	}
+}
+
+type UpdateTaskRequest struct {
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	DueDate     time.Time `json:"due_date"`
+	Priority    int       `json:"priority"`
+}
+
+func (th *taskHandler) UpdateTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var requestBody UpdateTaskRequest
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(&requestBody); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !th.isValidUpdateTasksRequest(&requestBody) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	params := th.convertUpdateTaskReqeuestToParams(requestBody)
+	if err := th.tuc.UpdateTask(ctx, params); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (th *taskHandler) isValidUpdateTasksRequest(requestBody *UpdateTaskRequest) bool {
+	if requestBody.ID == "" ||
+		requestBody.Title == "" ||
+		requestBody.Description == "" ||
+		requestBody.DueDate.IsZero() ||
+		!entity.ValidPriorities[entity.Priority(requestBody.Priority)] {
+		return false
+	}
+	return true
+}
+
+func (th *taskHandler) convertUpdateTaskReqeuestToParams(req UpdateTaskRequest) *usecase.UpdateTaskParams {
+	return &usecase.UpdateTaskParams{
+		ID:          req.ID,
+		Title:       req.Title,
+		Description: req.Description,
+		DueDate:     req.DueDate,
+		Priority:    req.Priority,
+	}
+}
+
+func (th *taskHandler) DeleteTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if err := th.tuc.DeleteTask(ctx, id); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}

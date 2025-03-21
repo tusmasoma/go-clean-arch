@@ -8,7 +8,8 @@ import (
 
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
-	"github.com/tusmasoma/go-tech-dojo/pkg/log"
+
+	"github.com/tusmasoma/go-clean-arch/pkg/log"
 
 	_ "github.com/go-sql-driver/mysql" // This blank import is used for its init function
 )
@@ -21,13 +22,11 @@ var (
 func TestMain(m *testing.M) {
 	var closeMySQL func()
 	var err error
-
 	db, mysqlPort, closeMySQL, err = startMySQL()
 	defer closeMySQL()
 	if err != nil {
 		log.Error("Failed to start MySQL: %v", err)
 	}
-
 	m.Run()
 }
 
@@ -36,19 +35,16 @@ func startMySQL() (*sql.DB, string, func(), error) {
 	if err != nil {
 		log.Error("Failed to get current directory: %v", err)
 	}
-
 	pool, err := dockertest.NewPool("")
 	if err != nil {
 		log.Error("Could not connect to Docker: %s", err)
 		return nil, "", nil, err
 	}
-
 	err = pool.Client.Ping()
 	if err != nil {
 		log.Error("Could not ping Docker: %s", err)
 		return nil, "", nil, err
 	}
-
 	runOptions := &dockertest.RunOptions{
 		Repository: "mysql",
 		Tag:        "8.0",
@@ -62,7 +58,6 @@ func startMySQL() (*sql.DB, string, func(), error) {
 			"--collation-server=utf8mb4_unicode_ci",
 		},
 	}
-
 	resource, err := pool.RunWithOptions(runOptions,
 		func(hc *docker.HostConfig) {
 			hc.AutoRemove = true
@@ -92,9 +87,7 @@ func startMySQL() (*sql.DB, string, func(), error) {
 		log.Error("Could not start resource: %s", err)
 		return nil, "", nil, err
 	}
-
 	port := resource.GetPort("3306/tcp")
-
 	err = pool.Retry(func() error {
 		dsn := fmt.Sprintf("root:goCleanArc@(localhost:%s)/goCleanArcTestDB?charset=utf8mb4&parseTime=true", port)
 		db, err = sql.Open("mysql", dsn)
@@ -107,9 +100,7 @@ func startMySQL() (*sql.DB, string, func(), error) {
 		log.Error("Could not connect to MySQL: %s", err)
 		return nil, "", nil, err
 	}
-
 	log.Info("start MySQL container🐳")
-
 	return db, port, func() { closeMySQL(db, pool, resource) }, nil
 }
 
@@ -117,11 +108,9 @@ func closeMySQL(db *sql.DB, pool *dockertest.Pool, resource *dockertest.Resource
 	if err := db.Close(); err != nil {
 		log.Error("Failed to close MySQL connection: %v", err)
 	}
-
 	if err := pool.Purge(resource); err != nil {
 		log.Error("Failed to purge MySQL container: %v", err)
 	}
-
 	log.Info("close MySQL container🐳")
 }
 
