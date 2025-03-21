@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/tusmasoma/go-clean-arch/config"
+	"github.com/tusmasoma/go-clean-arch/pkg/config"
 )
 
 type DB interface {

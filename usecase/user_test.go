@@ -8,7 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 
-	"github.com/tusmasoma/go-clean-arch/config"
+	"github.com/tusmasoma/go-clean-arch/pkg/config"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
 	jm "github.com/tusmasoma/go-clean-arch/pkg/jwt/mock"
