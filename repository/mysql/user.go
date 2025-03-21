@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/tusmasoma/go-clean-arch/entity"
+	"github.com/tusmasoma/go-clean-arch/pkg/log"
 	"github.com/tusmasoma/go-clean-arch/repository"
 )
 
@@ -17,8 +18,7 @@ type userModel struct {
 }
 
 type userRepository struct {
-	db SQLExecutor
-	tr transactionRepository
+	db DB
 }
 
 func NewUserRepository(db *sql.DB) repository.UserRepository {
@@ -28,17 +28,12 @@ func NewUserRepository(db *sql.DB) repository.UserRepository {
 }
 
 func (ur *userRepository) Get(ctx context.Context, id string) (*entity.User, error) {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
 	query := `SELECT *
 	FROM Users
 	WHERE id = ?
 	LIMIT 1`
 
-	row := executor.QueryRowContext(ctx, query, id)
+	row := ur.db.QueryRowContext(ctx, query, id)
 
 	var um userModel
 	if err := row.Scan(
@@ -58,15 +53,15 @@ func (ur *userRepository) Get(ctx context.Context, id string) (*entity.User, err
 }
 
 func (ur *userRepository) Create(ctx context.Context, user entity.User) error {
-	if err := ur.tr.Transaction(ctx, func(ctx context.Context) error {
-		exists, err := ur.lockUserByEmail(ctx, user.Email)
+	if err := ur.transaction(ctx, func(ctx context.Context, tx *sql.Tx) error {
+		exists, err := ur.lockUserByEmail(ctx, tx, user.Email)
 		if err != nil {
 			return err
 		}
 		if exists {
 			return errors.New("user with this email already exists")
 		}
-		if err = ur.create(ctx, user); err != nil {
+		if err = ur.create(ctx, tx, user); err != nil {
 			return err
 		}
 		return nil
@@ -76,12 +71,7 @@ func (ur *userRepository) Create(ctx context.Context, user entity.User) error {
 	return nil
 }
 
-func (ur *userRepository) create(ctx context.Context, user entity.User) error {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
+func (ur *userRepository) create(ctx context.Context, tx *sql.Tx, user entity.User) error {
 	query := `INSERT INTO Users (
 	id, name, email, password
 	)
@@ -95,7 +85,7 @@ func (ur *userRepository) create(ctx context.Context, user entity.User) error {
 		Password: user.Password,
 	}
 
-	if _, err := executor.ExecContext(
+	if _, err := tx.ExecContext(
 		ctx,
 		query,
 		um.ID,
@@ -108,19 +98,14 @@ func (ur *userRepository) create(ctx context.Context, user entity.User) error {
 	return nil
 }
 
-func (ur *userRepository) lockUserByEmail(ctx context.Context, email string) (bool, error) {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
+func (ur *userRepository) lockUserByEmail(ctx context.Context, tx *sql.Tx, email string) (bool, error) {
 	query := `SELECT id
 	FROM Users
 	WHERE email = ?
 	FOR UPDATE
 	`
 
-	row := executor.QueryRowContext(ctx, query, email)
+	row := tx.QueryRowContext(ctx, query, email)
 
 	var id string
 	if err := row.Scan(&id); err != nil {
@@ -133,11 +118,6 @@ func (ur *userRepository) lockUserByEmail(ctx context.Context, email string) (bo
 }
 
 func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
 	query := `UPDATE Users
 	SET name = ?, email = ?, password = ?
 	WHERE id = ?
@@ -150,7 +130,7 @@ func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
 		Password: user.Password,
 	}
 
-	if _, err := executor.ExecContext(
+	if _, err := ur.db.ExecContext(
 		ctx,
 		query,
 		um.Name,
@@ -164,16 +144,32 @@ func (ur *userRepository) Update(ctx context.Context, user entity.User) error {
 }
 
 func (ur *userRepository) Delete(ctx context.Context, id string) error {
-	executor := ur.db
-	if tx := TxFromCtx(ctx); tx != nil {
-		executor = tx
-	}
-
 	query := `DELETE FROM Users
 	WHERE id = ?
 	`
 
-	if _, err := executor.ExecContext(ctx, query, id); err != nil {
+	if _, err := ur.db.ExecContext(ctx, query, id); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ur *userRepository) transaction(ctx context.Context, fn func(ctx context.Context, tx *sql.Tx) error) error {
+	tx, err := ur.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil || err != nil {
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				log.Error("Failed to rollback transaction: %v", rollbackErr)
+			}
+		}
+	}()
+	if err = fn(ctx, tx); err != nil {
+		return err
+	}
+	if err = tx.Commit(); err != nil {
 		return err
 	}
 	return nil

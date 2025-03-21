@@ -35,7 +35,6 @@ func HTTPBuildContainer(ctx context.Context) (*dig.Container, error) {
 		config.NewDBConfig,
 		// This is database-agnostic and can be swapped with another database like PostgreSQL
 		mysql.NewMySQLDB,
-		mysql.NewTransactionRepository,
 		mysql.NewTaskRepository,
 		mysql.NewUserRepository,
 		auth.NewAuthRepository,

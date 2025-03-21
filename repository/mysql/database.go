@@ -5,67 +5,14 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/tusmasoma/go-clean-arch/pkg/log"
-
 	"github.com/tusmasoma/go-clean-arch/config"
-	"github.com/tusmasoma/go-clean-arch/repository"
 )
 
-type SQLExecutor interface {
+type DB interface {
 	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
 	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
-}
-
-type transactionRepository struct {
-	db *sql.DB
-}
-
-func NewTransactionRepository(db *sql.DB) repository.TransactionRepository {
-	return &transactionRepository{
-		db: db,
-	}
-}
-
-func (tr *transactionRepository) Transaction(ctx context.Context, fn func(ctx context.Context) error) error {
-	tx, err := tr.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
-	if err != nil {
-		return err
-	}
-
-	ctx = context.WithValue(ctx, CtxTxKey(), tx)
-
-	defer func() {
-		if p := recover(); p != nil || err != nil {
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				log.Error("Failed to rollback transaction: %v", rollbackErr)
-			}
-		}
-	}()
-
-	if err = fn(ctx); err != nil {
-		return err
-	}
-
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type TxKey string
-
-func CtxTxKey() TxKey {
-	return "tx"
-}
-
-func TxFromCtx(ctx context.Context) *sql.Tx {
-	tx, ok := ctx.Value(CtxTxKey()).(*sql.Tx)
-	if !ok {
-		return nil
-	}
-	return tx
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error)
 }
 
 const (
