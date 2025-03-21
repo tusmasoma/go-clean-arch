@@ -23,12 +23,6 @@ type DBConfig struct {
 	DBName   string `env:"DB_NAME, required"`
 }
 
-type CacheConfig struct {
-	Addr     string `env:"ADDR, required"`
-	Password string `env:"PASSWORD, required"`
-	DB       int    `env:"DB, required"`
-}
-
 type ServerConfig struct {
 	ReadTimeout               time.Duration `env:"READ_TIMEOUT,default=5s"`
 	WriteTimeout              time.Duration `env:"WRITE_TIMEOUT,default=10s"`
@@ -40,18 +34,6 @@ type ServerConfig struct {
 func NewDBConfig(ctx context.Context, dbPrefix string) (*DBConfig, error) {
 	conf := &DBConfig{}
 	pl := envconfig.PrefixLookuper(dbPrefix, envconfig.OsLookuper())
-	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
-		Target:   conf,
-		Lookuper: pl,
-	}); err != nil {
-		return nil, err
-	}
-	return conf, nil
-}
-
-func NewCacheConfig(ctx context.Context, cachePrefix string) (*CacheConfig, error) {
-	conf := &CacheConfig{}
-	pl := envconfig.PrefixLookuper(cachePrefix, envconfig.OsLookuper())
 	if err := envconfig.ProcessWith(ctx, &envconfig.Config{
 		Target:   conf,
 		Lookuper: pl,

@@ -1,6 +1,6 @@
-FROM golang:1.21.3
+FROM golang:1.23.4
 
-RUN apt-get update && apt-get install -y default-mysql-client && apt-get install -y postgresql-client
+RUN apt-get update && apt-get install -y default-mysql-client
 
 WORKDIR /app
 
