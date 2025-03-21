@@ -21,6 +21,8 @@ import (
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
 	"github.com/tusmasoma/go-clean-arch/config"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
