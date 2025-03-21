@@ -20,7 +20,7 @@ import (
 	"github.com/tusmasoma/go-clean-arch/repository/mysql"
 	"github.com/tusmasoma/go-clean-arch/usecase"
 
-	"github.com/tusmasoma/go-clean-arch/config"
+	"github.com/tusmasoma/go-clean-arch/pkg/config"
 
 	_ "github.com/go-sql-driver/mysql"
 )

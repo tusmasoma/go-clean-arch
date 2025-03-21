@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/tusmasoma/go-clean-arch/config"
+	"github.com/tusmasoma/go-clean-arch/pkg/config"
 	"github.com/tusmasoma/go-clean-arch/pkg/jwt"
 
 	"github.com/tusmasoma/go-clean-arch/entity"

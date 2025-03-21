@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/tusmasoma/go-clean-arch/config"
+	"github.com/tusmasoma/go-clean-arch/pkg/config"
 	"github.com/tusmasoma/go-clean-arch/pkg/jwt"
 )
 
