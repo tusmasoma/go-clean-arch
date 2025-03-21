@@ -43,7 +43,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title:       "title",
 				description: "description",
 				dueDate:     dueDate,
-				priority:    Medium,
+				priority:    int(Medium),
 			},
 			want: struct {
 				task *Task
@@ -72,7 +72,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title:       "title",
 				description: "description",
 				dueDate:     dueDate,
-				priority:    Medium,
+				priority:    int(Medium),
 			},
 			want: struct {
 				task *Task
@@ -95,7 +95,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title:       "",
 				description: "description",
 				dueDate:     dueDate,
-				priority:    Medium,
+				priority:    int(Medium),
 			},
 			want: struct {
 				task *Task
@@ -118,7 +118,7 @@ func TestEntity_NewTask(t *testing.T) {
 				title:       "title",
 				description: "",
 				dueDate:     dueDate,
-				priority:    Medium,
+				priority:    int(Medium),
 			},
 			want: struct {
 				task *Task
@@ -284,15 +284,15 @@ func TestEntity_Task_SetPriority(t *testing.T) {
 		name string
 		arg  int
 		want struct {
-			priority int
+			priority Priority
 			err      error
 		}
 	}{
 		{
 			name: "success",
-			arg:  Medium,
+			arg:  int(Medium),
 			want: struct {
-				priority int
+				priority Priority
 				err      error
 			}{
 				priority: Medium,
@@ -303,10 +303,10 @@ func TestEntity_Task_SetPriority(t *testing.T) {
 			name: "Fail: priority is less than 1",
 			arg:  0,
 			want: struct {
-				priority int
+				priority Priority
 				err      error
 			}{
-				priority: 0,
+				priority: Priority(0),
 				err:      errors.New("priority must be between 1 and 5"),
 			},
 		},
@@ -314,10 +314,10 @@ func TestEntity_Task_SetPriority(t *testing.T) {
 			name: "Fail: priority is greater than 5",
 			arg:  6,
 			want: struct {
-				priority int
+				priority Priority
 				err      error
 			}{
-				priority: 6,
+				priority: Priority(6),
 				err:      errors.New("priority must be between 1 and 5"),
 			},
 		},

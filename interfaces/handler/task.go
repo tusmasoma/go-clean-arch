@@ -56,7 +56,7 @@ func (th *taskHandler) GetTask(w http.ResponseWriter, r *http.Request) {
 		Title:       task.Title,
 		Description: task.Description,
 		DueDate:     task.DueDate,
-		Priority:    task.Priority,
+		Priority:    int(task.Priority),
 		CreatedAt:   task.CreatedAt,
 	}); err != nil {
 		http.Error(w, "Failed to encode task to JSON", http.StatusInternalServerError)
@@ -116,7 +116,7 @@ func (th *taskHandler) convertTasksToListTasksResponse(tasks []entity.Task) List
 			Title:       task.Title,
 			Description: task.Description,
 			DueDate:     task.DueDate,
-			Priority:    task.Priority,
+			Priority:    int(task.Priority),
 			CreatedAt:   task.CreatedAt,
 		})
 	}
@@ -159,7 +159,7 @@ func (th *taskHandler) isValidCreateTasksRequest(requestBody *CreateTaskRequest)
 	if requestBody.Title == "" ||
 		requestBody.Description == "" ||
 		requestBody.DueDate.IsZero() ||
-		!entity.ValidPriorities[requestBody.Priority] {
+		!entity.ValidPriorities[entity.Priority(requestBody.Priority)] {
 		return false
 	}
 	return true
@@ -210,7 +210,7 @@ func (th *taskHandler) isValidUpdateTasksRequest(requestBody *UpdateTaskRequest)
 		requestBody.Title == "" ||
 		requestBody.Description == "" ||
 		requestBody.DueDate.IsZero() ||
-		!entity.ValidPriorities[requestBody.Priority] {
+		!entity.ValidPriorities[entity.Priority(requestBody.Priority)] {
 		return false
 	}
 	return true

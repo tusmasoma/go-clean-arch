@@ -58,7 +58,7 @@ func (tr *taskRepository) Get(ctx context.Context, id string) (*entity.Task, err
 		Title:       tm.Title,
 		Description: tm.Description,
 		DueDate:     tm.DueDate,
-		Priority:    tm.Priority,
+		Priority:    entity.Priority(tm.Priority),
 		CreatedAt:   tm.CreatedAt,
 	}, nil
 }
@@ -103,7 +103,7 @@ func (tr *taskRepository) List(ctx context.Context, userID string) ([]entity.Tas
 			Title:       tm.Title,
 			Description: tm.Description,
 			DueDate:     tm.DueDate,
-			Priority:    tm.Priority,
+			Priority:    entity.Priority(tm.Priority),
 			CreatedAt:   tm.CreatedAt,
 		}
 	}
@@ -124,7 +124,7 @@ func (tr *taskRepository) Create(ctx context.Context, task entity.Task) error {
 		Title:       task.Title,
 		Description: task.Description,
 		DueDate:     task.DueDate,
-		Priority:    task.Priority,
+		Priority:    int(task.Priority),
 		CreatedAt:   task.CreatedAt,
 	}
 
@@ -155,7 +155,7 @@ func (tr *taskRepository) Update(ctx context.Context, task entity.Task) error {
 		Title:       task.Title,
 		Description: task.Description,
 		DueDate:     task.DueDate,
-		Priority:    task.Priority,
+		Priority:    int(task.Priority),
 	}
 
 	if _, err := tr.db.ExecContext(

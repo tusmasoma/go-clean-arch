@@ -7,39 +7,17 @@ import (
 	"github.com/google/uuid"
 )
 
-// The introduction of a custom Priority type was considered,
-// but it requires additional implementation for JSON decoding.
-// Therefore, for now, the standard int type is being used.
-// Introducing a Priority type in the future could improve code readability and safety,
-// so this decision should be revisited.
-//
-// type Priority int
-//
-// const (
-// 	Low Priority = iota + 1
-// 	MediumLow
-// 	Medium
-// 	MediumHigh
-// 	High
-// )
-//
-// var ValidPriorities = map[Priority]bool{
-// 	Low:        true,
-// 	MediumLow:  true,
-// 	Medium:     true,
-// 	MediumHigh: true,
-// 	High:       true,
-// }
+type Priority int
 
 const (
-	Low int = iota + 1
+	Low Priority = iota + 1
 	MediumLow
 	Medium
 	MediumHigh
 	High
 )
 
-var ValidPriorities = map[int]bool{
+var ValidPriorities = map[Priority]bool{
 	Low:        true,
 	MediumLow:  true,
 	Medium:     true,
@@ -53,7 +31,7 @@ type Task struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	DueDate     time.Time `json:"due_date"`
-	Priority    int       `json:"priority"`
+	Priority    Priority  `json:"priority"`
 	CreatedAt   time.Time `json:"created_at"`
 	IsOverdue   bool      `json:"is_overdue"`
 	IsDueSoon   bool      `json:"is_due_soon"`
@@ -69,10 +47,10 @@ func (t *Task) CheckDueSoon() bool {
 }
 
 func (t *Task) SetPriority(priority int) error {
-	if !ValidPriorities[priority] {
+	if !ValidPriorities[Priority(priority)] {
 		return errors.New("priority must be between 1 and 5")
 	}
-	t.Priority = priority
+	t.Priority = Priority(priority)
 	return nil
 }
 
@@ -87,7 +65,7 @@ func NewTask(userID, title, description string, dueDate time.Time, priority int)
 		return nil, errors.New("description is required")
 	}
 	// TODO: Check if dueDate is in the future
-	if !ValidPriorities[priority] {
+	if !ValidPriorities[Priority(priority)] {
 		return nil, errors.New("priority must be between 1 and 5")
 	}
 	return &Task{
@@ -96,7 +74,7 @@ func NewTask(userID, title, description string, dueDate time.Time, priority int)
 		Title:       title,
 		Description: description,
 		DueDate:     dueDate,
-		Priority:    priority,
+		Priority:    Priority(priority),
 		CreatedAt:   time.Now(),
 	}, nil
 }
