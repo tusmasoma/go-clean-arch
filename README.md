@@ -111,7 +111,7 @@ The dependencies between the layers are as follows:
 > ```
 
 ### Dependency Injection
-https://github.com/tusmasoma/go-clean-arch/blob/f39a1b86aa62032d1684b129f6697fed3b77c696/cmd/main.go#L38-L56
+https://github.com/tusmasoma/go-clean-arch/blob/f39a1b86aa62032d1684b129f6697fed3b77c696/cmd/main.go#L37-L56
 
 ## In Progress
 
