@@ -110,9 +110,10 @@ The dependencies between the layers are as follows:
 > └─ repository/
 > ```
 
-## In Progress
-
 ### Dependency Injection
+https://github.com/tusmasoma/go-clean-arch/blob/f39a1b86aa62032d1684b129f6697fed3b77c696/cmd/main.go#L37-L56
+
+## In Progress
 
 In progress of writing
 
